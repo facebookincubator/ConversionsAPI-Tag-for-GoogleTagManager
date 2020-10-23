@@ -114,8 +114,9 @@ event.custom_data.status = eventModel['x-fb-cd-status'];
 event.custom_data.delivery_category = eventModel['x-fb-cd-delivery_category'];
 
 const eventRequest = {data: [event], partner_agent: partnerAgent};
-if(data.testEventCode) {
-  eventRequest.test_event_code = data.testEventCode;
+
+if(eventModel.test_event_code || data.testEventCode) {
+  eventRequest.test_event_code = eventModel.test_event_code ? eventModel.test_event_code : data.testEventCode;
 }
 
 // Posting to Conversions API
@@ -249,6 +250,7 @@ setup: |-
   const testData = {
     event_name: "Test1",
     event_time: "123456789",
+    test_event_code: "test123",
     user_data: {
       ip_address: '1.2.3.4',
       user_agent: 'Test_UA',
@@ -288,6 +290,7 @@ setup: |-
     'event_time': testData.event_time,
     'ip_override': testData.user_data.ip_address,
     'user_agent': testData.user_data.user_agent,
+    'test_event_code': testData.test_event_code,
     'x-fb-ud-em': testData.user_data.email,
     'x-fb-ud-ph': testData.user_data.phone_number,
     'x-fb-ud-fn': testData.user_data.first_name,
@@ -365,7 +368,7 @@ setup: |-
                           testConfigurationData.pixelId,
                           routeParams].join('/');
 
-  const requestData = JSON.stringify({data: [expectedEventData], partner_agent: partnerAgent, test_event_code: testConfigurationData.testEventCode});
+  const requestData = JSON.stringify({data: [expectedEventData], partner_agent: partnerAgent, test_event_code: testData.test_event_code});
   const requestHeaderOptions = {headers: {'content-type': 'application/json'}, method: 'POST'};
 
   let actualSuccessCallback, httpBody;

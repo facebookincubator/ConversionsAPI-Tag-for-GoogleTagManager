@@ -1,3 +1,6 @@
 homepage: "https://facebook.com"
 documentation: "https://developers.facebook.com/docs/marketing-api/conversions-api"
-# Todo(rchokkalingam): Update sha version and change notes public release.
+versions:
+  # Initial Version for Conversions API Tag
+  - sha: 34ed4d9542fb9b8d651410bfa4cc5d21f25f9c59
+    changeNotes: Adding support for converting common event model with Facebook Pixel specific parameters to Conversions API.
