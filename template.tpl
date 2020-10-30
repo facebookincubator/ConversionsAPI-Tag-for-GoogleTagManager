@@ -67,6 +67,8 @@ const getAllEventData = require('getAllEventData');
 const sendHttpRequest = require('sendHttpRequest');
 const logToConsole = require('logToConsole');
 const JSON = require('JSON');
+const Math = require('Math');
+const getTimestampMillis = require('getTimestampMillis');
 
 // Constants
 const apiEndpoint = 'https://graph.facebook.com';
@@ -78,7 +80,7 @@ const partnerAgent = 'gtmss-1.0.0-0.0.1';
 const eventModel = getAllEventData();
 const event = {};
 event.event_name = eventModel.event_name;
-event.event_time = eventModel.event_time;
+event.event_time = eventModel.event_time || (Math.round(getTimestampMillis() / 1000));
 event.event_id = eventModel.event_id;
 event.event_source_url = eventModel.page_location;
 
@@ -236,11 +238,33 @@ scenarios:
     //Assert
     assertApi('sendHttpRequest').wasCalledWith(requestEndpoint, actualSuccessCallback, requestHeaderOptions, requestData);
     assertApi('gtmOnSuccess').wasCalled();
+- name: on Event with common event schema triggers tag to send to Conversions
+    API
+  code: |-
+    const preTagFireEventTime = Math.round(getTimestampMillis() / 1000);
+    const common_event_schema = {
+        event_name: testData.event_name,
+        client_id: 'client123',
+        ip_override: testData.ip_address,
+        user_agent: testData.user_agent,
+      };
+    mock('getAllEventData', () => {
+      return common_event_schema;
+    });
+
+    // Act
+    runCode(testConfigurationData);
+
+    //Assert
+    const actualTagFireEventTime = JSON.parse(httpBody).data[0].event_time;
+    assertThat(actualTagFireEventTime-preTagFireEventTime).isLessThan(1);
+    assertApi('gtmOnSuccess').wasCalled();
 setup: |-
   // Arrange
   const JSON = require('JSON');
   const Math = require('Math');
   const logToConsole = require('logToConsole');
+  const getTimestampMillis = require('getTimestampMillis');
 
   const testConfigurationData = {
     pixelId: '123',
