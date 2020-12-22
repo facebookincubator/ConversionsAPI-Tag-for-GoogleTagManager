@@ -72,8 +72,8 @@ const getTimestampMillis = require('getTimestampMillis');
 
 // Constants
 const apiEndpoint = 'https://graph.facebook.com';
-const apiVersion = 'v8.0';
-const partnerAgent = 'gtmss-1.0.0-0.0.1';
+const apiVersion = 'v9.0';
+const partnerAgent = 'gtmss-1.0.0-0.0.2';
 
 
 // Mapping common Event Model data into Conversions API schema
@@ -384,8 +384,8 @@ setup: |-
   });
 
   const apiEndpoint = 'https://graph.facebook.com';
-  const apiVersion = 'v8.0';
-  const partnerAgent = 'gtmss-1.0.0-0.0.1';
+  const apiVersion = 'v9.0';
+  const partnerAgent = 'gtmss-1.0.0-0.0.2';
 
   const routeParams = 'events?access_token=' + testConfigurationData.apiAccessToken;
   const requestEndpoint = [apiEndpoint,
