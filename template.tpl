@@ -56,6 +56,48 @@ ___TEMPLATE_PARAMETERS___
     "name": "testEventCode",
     "displayName": "Test Event Code",
     "simpleValueType": true
+  },
+  {
+    "type": "SELECT",
+    "name": "actionSource",
+    "displayName": "Action Source",
+    "macrosInSelect": false,
+    "selectItems": [
+      {
+        "value": "website",
+        "displayValue": "Website"
+      },
+      {
+        "value": "email",
+        "displayValue": "Email"
+      },
+      {
+        "value": "app",
+        "displayValue": "App"
+      },
+      {
+        "value": "phone_call",
+        "displayValue": "Phone Call"
+      },
+      {
+        "value": "chat",
+        "displayValue": "Chat"
+      },
+      {
+        "value": "physical_store",
+        "displayValue": "Physical Store"
+      },
+      {
+        "value": "system_generated",
+        "displayValue": "System Generated"
+      },
+      {
+        "value": "other",
+        "displayValue": "Other"
+      }
+    ],
+    "simpleValueType": true,
+    "help": "This field allows you to specify where your conversions occurred. Knowing where your events took place helps ensure your ads go to the right people. See \u003ca href\u003d\"https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/server-event#action-source\"\u003ehere\u003c/a\u003e for more information."
   }
 ]
 
@@ -83,6 +125,7 @@ event.event_name = eventModel.event_name;
 event.event_time = eventModel.event_time || (Math.round(getTimestampMillis() / 1000));
 event.event_id = eventModel.event_id;
 event.event_source_url = eventModel.page_location;
+event.action_source = data.actionSource;
 
 event.user_data = {};
 event.user_data.client_ip_address = eventModel.ip_override;
@@ -270,6 +313,7 @@ setup: |-
     pixelId: '123',
     apiAccessToken: 'abc',
     testEventCode: 'test123',
+    actionSource: 'source123'
   };
 
   const testData = {
@@ -346,6 +390,7 @@ setup: |-
   const expectedEventData = {
     'event_name': testData.event_name,
     'event_time': testData.event_time,
+    'action_source': testConfigurationData.actionSource,
     'user_data': {
       'client_ip_address': testData.user_data.ip_address,
       'client_user_agent': testData.user_data.user_agent,
