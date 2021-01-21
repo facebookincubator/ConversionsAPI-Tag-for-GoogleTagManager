@@ -125,7 +125,9 @@ event.event_name = eventModel.event_name;
 event.event_time = eventModel.event_time || (Math.round(getTimestampMillis() / 1000));
 event.event_id = eventModel.event_id;
 event.event_source_url = eventModel.page_location;
-event.action_source = data.actionSource;
+if(eventModel.action_source || data.actionSource) {
+  event.action_source = eventModel.action_source ? eventModel.action_source : data.actionSource;
+}
 
 event.user_data = {};
 event.user_data.client_ip_address = eventModel.ip_override;
@@ -279,7 +281,7 @@ scenarios:
     runCode(testConfigurationData);
 
     //Assert
-    assertApi('sendHttpRequest').wasCalledWith(requestEndpoint, actualSuccessCallback, requestHeaderOptions, requestData);
+    assertApi('sendHttpRequest').wasCalledWith(requestEndpoint, actualSuccessCallback, requestHeaderOptions, JSON.stringify(requestData));
     assertApi('gtmOnSuccess').wasCalled();
 - name: on Event with common event schema triggers tag to send to Conversions
     API
@@ -302,6 +304,17 @@ scenarios:
     const actualTagFireEventTime = JSON.parse(httpBody).data[0].event_time;
     assertThat(actualTagFireEventTime-preTagFireEventTime).isLessThan(1);
     assertApi('gtmOnSuccess').wasCalled();
+- name: on sending action source from Client, Tag overrides the preset configuration
+  code: |-
+    // Act
+    mock('getAllEventData', () => {
+      inputEventModel.action_source = testData.action_source;
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+
+    //Assert
+    assertThat(JSON.parse(httpBody).data[0].action_source).isEqualTo(inputEventModel.action_source);
 setup: |-
   // Arrange
   const JSON = require('JSON');
@@ -320,6 +333,7 @@ setup: |-
     event_name: "Test1",
     event_time: "123456789",
     test_event_code: "test123",
+    action_source: 'website',
     user_data: {
       ip_address: '1.2.3.4',
       user_agent: 'Test_UA',
@@ -354,7 +368,7 @@ setup: |-
     }
   };
 
-  const inputEventModel = {
+  let inputEventModel = {
     'event_name': testData.event_name,
     'event_time': testData.event_time,
     'ip_override': testData.user_data.ip_address,
@@ -438,7 +452,11 @@ setup: |-
                           testConfigurationData.pixelId,
                           routeParams].join('/');
 
-  const requestData = JSON.stringify({data: [expectedEventData], partner_agent: partnerAgent, test_event_code: testData.test_event_code});
+  let requestData = {
+                      data: [expectedEventData],
+                      partner_agent: partnerAgent,
+                      test_event_code: testData.test_event_code
+                     };
   const requestHeaderOptions = {headers: {'content-type': 'application/json'}, method: 'POST'};
 
   let actualSuccessCallback, httpBody;
