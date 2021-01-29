@@ -113,15 +113,33 @@ const Math = require('Math');
 const getTimestampMillis = require('getTimestampMillis');
 
 // Constants
-const apiEndpoint = 'https://graph.facebook.com';
-const apiVersion = 'v9.0';
-const partnerAgent = 'gtmss-1.0.0-0.0.2';
+const API_ENDPOINT = 'https://graph.facebook.com';
+const API_VERSION = 'v9.0';
+const PARTNER_AGENT = 'gtmss-1.0.0-0.0.2';
+const GTM_DIRECT_MAPPING_EVENTS = ['add_payment_info', 'add_to_cart', 'add_to_wishlist', 'page_view', 'purchase', 'search'];
 
 
 // Mapping common Event Model data into Conversions API schema
 const eventModel = getAllEventData();
 const event = {};
-event.event_name = eventModel.event_name;
+const snakeCaseToCamelCase = (name) => {
+                    return name.split('_')
+                               .map((w) => w.length ? w.slice(0, 1).toUpperCase() + w.slice(1) : w)
+                               .join('');
+                    };
+
+const getFacebookEventName = (gtmEventName) => {
+  // If the FB and GTM events differs only in casing, convert from snake case to upper case(FB Standard).
+  if(GTM_DIRECT_MAPPING_EVENTS.indexOf(gtmEventName) === 1) return snakeCaseToCamelCase(gtmEventName);
+
+  if(gtmEventName == 'begin_checkout') return 'InitiateCheckout';
+  if(gtmEventName == 'generate_lead') return 'Lead';
+  if(gtmEventName == 'view_item') return 'ViewContent';
+  if(gtmEventName == 'signup') return 'CompleteRegistration';
+  return gtmEventName;
+};
+
+event.event_name = getFacebookEventName(eventModel.event_name);
 event.event_time = eventModel.event_time || (Math.round(getTimestampMillis() / 1000));
 event.event_id = eventModel.event_id;
 event.event_source_url = eventModel.page_location;
@@ -161,7 +179,7 @@ event.custom_data.predicted_ltv = eventModel['x-fb-cd-predicted_ltv'];
 event.custom_data.status = eventModel['x-fb-cd-status'];
 event.custom_data.delivery_category = eventModel['x-fb-cd-delivery_category'];
 
-const eventRequest = {data: [event], partner_agent: partnerAgent};
+const eventRequest = {data: [event], partner_agent: PARTNER_AGENT};
 
 if(eventModel.test_event_code || data.testEventCode) {
   eventRequest.test_event_code = eventModel.test_event_code ? eventModel.test_event_code : data.testEventCode;
@@ -169,8 +187,8 @@ if(eventModel.test_event_code || data.testEventCode) {
 
 // Posting to Conversions API
 const routeParams = 'events?access_token=' + data.apiAccessToken;
-const graphEndpoint = [apiEndpoint,
-                       apiVersion,
+const graphEndpoint = [API_ENDPOINT,
+                       API_VERSION,
                        data.pixelId,
                        routeParams].join('/');
 
@@ -283,8 +301,7 @@ scenarios:
     //Assert
     assertApi('sendHttpRequest').wasCalledWith(requestEndpoint, actualSuccessCallback, requestHeaderOptions, JSON.stringify(requestData));
     assertApi('gtmOnSuccess').wasCalled();
-- name: on Event with common event schema triggers tag to send to Conversions
-    API
+- name: on Event with common event schema triggers tag to send to Conversions API
   code: |-
     const preTagFireEventTime = Math.round(getTimestampMillis() / 1000);
     const common_event_schema = {
@@ -315,6 +332,39 @@ scenarios:
 
     //Assert
     assertThat(JSON.parse(httpBody).data[0].action_source).isEqualTo(inputEventModel.action_source);
+- name: on receiving event, if GTM Standard Event then Tag converts to corresponding
+    Facebook Event, passes through as-is if otherwise
+  code: |-
+    // Act
+    mock('getAllEventData', () => {
+      inputEventModel.event_name = 'add_to_cart';
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+
+    //Assert
+    assertThat(JSON.parse(httpBody).data[0].event_name).isEqualTo('AddToCart');
+
+
+    // Act
+    mock('getAllEventData', () => {
+      inputEventModel.event_name = 'custom_event';
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+
+    //Assert
+    assertThat(JSON.parse(httpBody).data[0].event_name).isEqualTo('custom_event');
+
+    // Act
+    mock('getAllEventData', () => {
+      inputEventModel.event_name = 'generate_lead';
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+
+    //Assert
+    assertThat(JSON.parse(httpBody).data[0].event_name).isEqualTo('Lead');
 setup: |-
   // Arrange
   const JSON = require('JSON');
