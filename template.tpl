@@ -114,8 +114,8 @@ const getTimestampMillis = require('getTimestampMillis');
 
 // Constants
 const API_ENDPOINT = 'https://graph.facebook.com';
-const API_VERSION = 'v9.0';
-const PARTNER_AGENT = 'gtmss-1.0.0-0.0.2';
+const API_VERSION = 'v10.0';
+const PARTNER_AGENT = 'gtmss-1.0.0-0.0.3';
 const GTM_DIRECT_MAPPING_EVENTS = ['add_payment_info', 'add_to_cart', 'add_to_wishlist', 'page_view', 'purchase', 'search'];
 
 
@@ -493,8 +493,8 @@ setup: |-
   });
 
   const apiEndpoint = 'https://graph.facebook.com';
-  const apiVersion = 'v9.0';
-  const partnerAgent = 'gtmss-1.0.0-0.0.2';
+  const apiVersion = 'v10.0';
+  const partnerAgent = 'gtmss-1.0.0-0.0.3';
 
   const routeParams = 'events?access_token=' + testConfigurationData.apiAccessToken;
   const requestEndpoint = [apiEndpoint,
