@@ -133,11 +133,20 @@ function hashFunction(input){
   return sha256Sync(input.trim().toLowerCase(), {outputEncoding: 'hex'});
 }
 
-
+function getContentFromItems(items) {
+    return items.map(item => {
+        return {
+            "id": item.item_id,
+            "title": item.item_name,
+            "item_price": item.price,
+            "brand": item.item_brand,
+            "quantity": item.quantity,
+            "category": item.item_category,
+        };
+    });
+}
 
 // Mapping common Event Model data into Conversions API schema
-const eventModel = getAllEventData();
-const event = {};
 const snakeCaseToCamelCase = (name) => {
                     return name.split('_')
                                .map((w) => w.length ? w.slice(0, 1).toUpperCase() + w.slice(1) : w)
@@ -155,6 +164,8 @@ const getFacebookEventName = (gtmEventName) => {
   return gtmEventName;
 };
 
+const eventModel = getAllEventData();
+const event = {};
 event.event_name = getFacebookEventName(eventModel.event_name);
 event.event_time = eventModel.event_time || (Math.round(getTimestampMillis() / 1000));
 event.event_id = eventModel.event_id;
@@ -191,11 +202,12 @@ event.custom_data = {};
 event.custom_data.currency = eventModel.currency;
 event.custom_data.value = eventModel.value;
 event.custom_data.search_string = eventModel.search_term;
+event.custom_data.order_id = eventModel.transaction_id;
 event.custom_data.content_category = eventModel['x-fb-cd-content_category'];
 event.custom_data.content_ids = eventModel['x-fb-cd-content_ids'];
 event.custom_data.content_name = eventModel['x-fb-cd-content_name'];
 event.custom_data.content_type = eventModel['x-fb-cd-content_type'];
-event.custom_data.contents = eventModel['x-fb-cd-contents'];
+event.custom_data.contents = eventModel['x-fb-cd-contents'] || eventModel.items != null && getContentFromItems(eventModel.items);
 event.custom_data.num_items = eventModel['x-fb-cd-num_items'];
 event.custom_data.predicted_ltv = eventModel['x-fb-cd-predicted_ltv'];
 event.custom_data.status = eventModel['x-fb-cd-status'];
@@ -517,6 +529,44 @@ scenarios:
     //Assert
     assertThat(JSON.parse(httpBody).data[0].user_data.fbp).isEqualTo('fbp_cookie');
     assertThat(JSON.parse(httpBody).data[0].user_data.fbc).isEqualTo('fbc_cookie');
+- name: On receiving GA4 event, with the items info, tag parses them into Conversions API schema
+  code: |-
+    // Act
+    let items = [
+        {
+          item_id: '1',
+          item_name: 'item_1',
+          quantity: 5,
+          price: 123.45,
+          item_category: 'cat_1',
+          item_brand: 'brand_1',
+        },
+        {
+        item_id: '2',
+        item_name: 'item_2',
+        quantity: 10,
+        price: 123.45,
+        item_category: 'cat_2',
+        item_brand: 'brand_2',
+        }
+      ];
+    mock('getAllEventData', () => {
+      inputEventModel['x-fb-cd-contents'] = null;
+      inputEventModel.items = items;
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+
+    //Assert
+    let actual_contents = JSON.parse(httpBody).data[0].custom_data.contents;
+    assertThat(JSON.parse(httpBody).data[0].custom_data.contents.length).isEqualTo(items.length);
+    for( var i = 0; i < items.length; i++) {
+      assertThat(actual_contents[i].id).isEqualTo(items[i].item_id);
+      assertThat(actual_contents[i].item_price).isEqualTo(items[i].price);
+      assertThat(actual_contents[i].brand).isEqualTo(items[i].item_brand);
+      assertThat(actual_contents[i].quantity).isEqualTo(items[i].quantity);
+      assertThat(actual_contents[i].category).isEqualTo(items[i].item_category);
+    }
 setup: |-
   // Arrange
   const JSON = require('JSON');
@@ -564,6 +614,7 @@ setup: |-
       currency: 'USD',
       value: '123',
       search_string: 'query123',
+      transaction_id: 'order_123',
       content_category: 'testCategory',
       content_ids: ['123', '456'],
       content_name: 'Foo',
@@ -599,6 +650,7 @@ setup: |-
     'currency': testData.custom_data.currency,
     'value': testData.custom_data.value,
     'search_term': testData.custom_data.search_string,
+    'transaction_id': testData.custom_data.transaction_id,
     'x-fb-cd-status': testData.custom_data.status,
     'x-fb-cd-content_category': testData.custom_data.content_category,
     'x-fb-cd-content_name': testData.custom_data.content_name,
@@ -635,6 +687,7 @@ setup: |-
       'currency': testData.custom_data.currency,
       'value': testData.custom_data.value,
       'search_string': testData.custom_data.search_string,
+      'order_id': testData.custom_data.transaction_id,
       'content_category': testData.custom_data.content_category,
       'content_name': testData.custom_data.content_name,
       'content_type': testData.custom_data.content_type,
