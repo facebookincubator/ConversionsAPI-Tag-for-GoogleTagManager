@@ -111,12 +111,27 @@ const logToConsole = require('logToConsole');
 const JSON = require('JSON');
 const Math = require('Math');
 const getTimestampMillis = require('getTimestampMillis');
+const sha256Sync = require('sha256Sync');
 
 // Constants
 const API_ENDPOINT = 'https://graph.facebook.com';
 const API_VERSION = 'v10.0';
 const PARTNER_AGENT = 'gtmss-1.0.0-0.0.3';
 const GTM_DIRECT_MAPPING_EVENTS = ['add_payment_info', 'add_to_cart', 'add_to_wishlist', 'page_view', 'purchase', 'search'];
+
+function isAlreadyHashed(input){
+  return input && (input.match('^[A-Fa-f0-9]{64}$') != null);
+}
+
+
+function hashFunction(input){
+  if(input == null || isAlreadyHashed(input)){
+    return input;
+  }
+
+  return sha256Sync(input.trim().toLowerCase(), {outputEncoding: 'hex'});
+}
+
 
 
 // Mapping common Event Model data into Conversions API schema
@@ -148,18 +163,24 @@ if(eventModel.action_source || data.actionSource) {
 }
 
 event.user_data = {};
+// Default Tag Parameters
 event.user_data.client_ip_address = eventModel.ip_override;
 event.user_data.client_user_agent = eventModel.user_agent;
-event.user_data.em = eventModel['x-fb-ud-em'];
-event.user_data.ph = eventModel['x-fb-ud-ph'];
-event.user_data.fn = eventModel['x-fb-ud-fn'];
-event.user_data.ln = eventModel['x-fb-ud-ln'];
+
+
+// Commmon Event Schema Parameters
+event.user_data.em = eventModel['x-fb-ud-em'] || eventModel.user_data != null && hashFunction(eventModel.user_data.email_address);
+event.user_data.ph = eventModel['x-fb-ud-ph'] || eventModel.user_data != null && hashFunction(eventModel.user_data.phone_number);
+event.user_data.fn = eventModel['x-fb-ud-fn'] || eventModel.user_data != null && hashFunction(eventModel.user_data.address.first_name);
+event.user_data.ln = eventModel['x-fb-ud-ln'] || eventModel.user_data != null && hashFunction(eventModel.user_data.address.last_name);
+event.user_data.ct = eventModel['x-fb-ud-ct'] || eventModel.user_data != null && hashFunction(eventModel.user_data.address.city);
+event.user_data.st = eventModel['x-fb-ud-st'] || eventModel.user_data != null && hashFunction(eventModel.user_data.address.region);
+event.user_data.zp = eventModel['x-fb-ud-zp'] || eventModel.user_data != null && hashFunction(eventModel.user_data.address.postal_code);
+event.user_data.country = eventModel['x-fb-ud-country'] || eventModel.user_data != null && hashFunction(eventModel.user_data.address.country);
+
+// Facebook Specific Parameters
 event.user_data.ge = eventModel['x-fb-ud-ge'];
 event.user_data.db = eventModel['x-fb-ud-db'];
-event.user_data.ct = eventModel['x-fb-ud-ct'];
-event.user_data.st = eventModel['x-fb-ud-st'];
-event.user_data.zp = eventModel['x-fb-ud-zp'];
-event.user_data.country = eventModel['x-fb-ud-country'];
 event.user_data.external_id = eventModel['x-fb-ud-external_id'];
 event.user_data.subscription_id = eventModel['x-fb-ud-subscription_id'];
 event.user_data.fbp = eventModel['x-fb-ck-fbp'];
@@ -365,12 +386,92 @@ scenarios:
 
     //Assert
     assertThat(JSON.parse(httpBody).data[0].event_name).isEqualTo('Lead');
+- name: On receiving event, hashes the the user_data fields if they are not already hashed
+  code: |-
+    // Un-hashed raw email_address from Common Event Schema is hashed before posted to Conversions API.
+
+    // Act
+    mock('getAllEventData', () => {
+      inputEventModel['x-fb-ud-em'] = null;
+      inputEventModel['x-fb-ud-ph'] = null;
+      inputEventModel['x-fb-ud-fn'] = null;
+      inputEventModel['x-fb-ud-ln'] = null;
+      inputEventModel['x-fb-ud-ct'] = null;
+      inputEventModel['x-fb-ud-st'] = null;
+      inputEventModel['x-fb-ud-zp'] = null;
+      inputEventModel['x-fb-ud-country'] = null;
+      inputEventModel.user_data = {};
+      inputEventModel.user_data.email_address = 'foo@bar.com';
+      inputEventModel.user_data.phone_number = '1234567890';
+      inputEventModel.user_data.address = {};
+      inputEventModel.user_data.address.first_name = 'Foo';
+      inputEventModel.user_data.address.last_name = 'Bar';
+      inputEventModel.user_data.address.city = 'Menlo Park';
+      inputEventModel.user_data.address.region = 'ca';
+      inputEventModel.user_data.address.postal_code = '12345';
+      inputEventModel.user_data.address.country = 'usa';
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+
+    //Assert
+    assertThat(JSON.parse(httpBody).data[0].user_data.em).isEqualTo(hashFunction('foo@bar.com'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.ph).isEqualTo(hashFunction('1234567890'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.fn).isEqualTo(hashFunction('Foo'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.ln).isEqualTo(hashFunction('Bar'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.ct).isEqualTo(hashFunction('Menlo Park'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.st).isEqualTo(hashFunction('ca'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.zp).isEqualTo(hashFunction('12345'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.country).isEqualTo(hashFunction('usa'));
+
+    // Un-hashed raw email_address in mixed-case is converted to lowercase, hashed and posted to Conversions API.
+
+    // Act
+    mock('getAllEventData', () => {
+      inputEventModel.user_data.email_address = 'FOO@BAR.com';
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+
+    //Assert
+    assertThat(JSON.parse(httpBody).data[0].user_data.em).isEqualTo(hashFunction('foo@bar.com'));
+
+
+    // Already sha256(email_address) field from GA4 schema, is unchanged, is posted as-is to Conversions API.
+
+    // Act
+    mock('getAllEventData', () => {
+      inputEventModel.user_data.email_address = hashFunction('foo@bar.com');
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+
+    //Assert
+    assertThat(JSON.parse(httpBody).data[0].user_data.em).isEqualTo(hashFunction('foo@bar.com'));
+
+    // Already null email field from GA4 schema, is sent as null to Conversions API.
+
+    // Act
+    mock('getAllEventData', () => {
+      inputEventModel.user_data.email_address = null;
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+
+    //Assert
+    assertThat(JSON.parse(httpBody).data[0].user_data.em).isEqualTo(null);
 setup: |-
   // Arrange
   const JSON = require('JSON');
   const Math = require('Math');
   const logToConsole = require('logToConsole');
   const getTimestampMillis = require('getTimestampMillis');
+  const sha256Sync = require('sha256Sync');
+
+  // helper methods
+  function hashFunction(input) {
+    return sha256Sync(input.trim().toLowerCase(), {outputEncoding: 'hex'});
+  }
 
   const testConfigurationData = {
     pixelId: '123',
@@ -452,27 +553,27 @@ setup: |-
   };
 
   const expectedEventData = {
-    'event_name': testData.event_name,
-    'event_time': testData.event_time,
-    'action_source': testConfigurationData.actionSource,
-    'user_data': {
-      'client_ip_address': testData.user_data.ip_address,
-      'client_user_agent': testData.user_data.user_agent,
-      'em': testData.user_data.email,
-      'ph': testData.user_data.phone_number,
-      'fn': testData.user_data.first_name,
-      'ln': testData.user_data.last_name,
-      'ge': testData.user_data.gender,
-      'db': testData.user_data.date_of_brith,
-      'ct': testData.user_data.city,
-      'st': testData.user_data.state,
-      'zp': testData.user_data.zip,
-      'country': testData.user_data.country,
-      'external_id': testData.user_data.external_id,
-      'subscription_id': testData.user_data.subscription_id,
-      'fbp': testData.user_data.fbp,
-      'fbc': testData.user_data.fbc,
-    },
+  'event_name': testData.event_name,
+  'event_time': testData.event_time,
+  'action_source': testConfigurationData.actionSource,
+  'user_data': {
+    'client_ip_address': testData.user_data.ip_address,
+    'client_user_agent': testData.user_data.user_agent,
+    'em': testData.user_data.email,
+    'ph': testData.user_data.phone_number,
+    'fn': testData.user_data.first_name,
+    'ln': testData.user_data.last_name,
+    'ct': testData.user_data.city,
+    'st': testData.user_data.state,
+    'zp': testData.user_data.zip,
+    'country': testData.user_data.country,
+    'ge': testData.user_data.gender,
+    'db': testData.user_data.date_of_brith,
+    'external_id': testData.user_data.external_id,
+    'subscription_id': testData.user_data.subscription_id,
+    'fbp': testData.user_data.fbp,
+    'fbc': testData.user_data.fbc,
+  },
     'custom_data': {
       'currency': testData.custom_data.currency,
       'value': testData.custom_data.value,
