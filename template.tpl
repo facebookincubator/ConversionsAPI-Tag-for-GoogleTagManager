@@ -112,6 +112,7 @@ const JSON = require('JSON');
 const Math = require('Math');
 const getTimestampMillis = require('getTimestampMillis');
 const sha256Sync = require('sha256Sync');
+const getCookieValues = require('getCookieValues');
 
 // Constants
 const API_ENDPOINT = 'https://graph.facebook.com';
@@ -183,8 +184,8 @@ event.user_data.ge = eventModel['x-fb-ud-ge'];
 event.user_data.db = eventModel['x-fb-ud-db'];
 event.user_data.external_id = eventModel['x-fb-ud-external_id'];
 event.user_data.subscription_id = eventModel['x-fb-ud-subscription_id'];
-event.user_data.fbp = eventModel['x-fb-ck-fbp'];
-event.user_data.fbc = eventModel['x-fb-ck-fbc'];
+event.user_data.fbp = eventModel['x-fb-ck-fbp'] || getCookieValues('_fbp', true)[0];
+event.user_data.fbc = eventModel['x-fb-ck-fbc'] || getCookieValues('_fbc', true)[0];
 
 event.custom_data = {};
 event.custom_data.currency = eventModel.currency;
@@ -299,6 +300,43 @@ ___SERVER_PERMISSIONS___
           "value": {
             "type": 1,
             "string": "debug"
+          }
+        }
+      ]
+    },
+    "clientAnnotations": {
+      "isEditedByUser": true
+    },
+    "isRequired": true
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "get_cookies",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "cookieAccess",
+          "value": {
+            "type": 1,
+            "string": "specific"
+          }
+        },
+        {
+          "key": "cookieNames",
+          "value": {
+            "type": 2,
+            "listItem": [
+              {
+                "type": 1,
+                "string": "_fbp"
+              },
+              {
+                "type": 1,
+                "string": "_fbc"
+              }
+            ]
           }
         }
       ]
@@ -460,6 +498,25 @@ scenarios:
 
     //Assert
     assertThat(JSON.parse(httpBody).data[0].user_data.em).isEqualTo(null);
+- name: On receiving event with fbp/fbc cookies, it is sent to Conversions API
+  code: |-
+    // Act
+    mock('getAllEventData', () => {
+      inputEventModel['x-fb-ck-fbp'] = null;
+      inputEventModel['x-fb-ck-fbc'] = null;
+      return inputEventModel;
+    });
+
+    mock('getCookieValues', (cookieName) => {
+      if(cookieName === '_fbp') return ['fbp_cookie'];
+      if(cookieName === '_fbc') return ['fbc_cookie'];
+    });
+
+    runCode(testConfigurationData);
+
+    //Assert
+    assertThat(JSON.parse(httpBody).data[0].user_data.fbp).isEqualTo('fbp_cookie');
+    assertThat(JSON.parse(httpBody).data[0].user_data.fbc).isEqualTo('fbc_cookie');
 setup: |-
   // Arrange
   const JSON = require('JSON');
