@@ -49,13 +49,15 @@ ___TEMPLATE_PARAMETERS___
       {
         "type": "NON_EMPTY"
       }
-    ]
+    ],
+    "help": "To use the Conversions API, you need an access token. See \u003ca href\u003d\"https://developers.facebook.com/docs/marketing-api/conversions-api/get-started#access-token\"\u003ehere\u003c/a\u003e for generating an access token."
   },
   {
     "type": "TEXT",
     "name": "testEventCode",
     "displayName": "Test Event Code",
-    "simpleValueType": true
+    "simpleValueType": true,
+    "help": "Code used to verify that your server events are received correctly by Facebook. Use this code to test your server events in the Test Events feature in Events Manager. See \u003ca href\u003d\"https://developers.facebook.com/docs/marketing-api/conversions-api/using-the-api#testEvents\"\u003e Test Events Tool\u003c/a\u003e for an example."
   },
   {
     "type": "SELECT",
