@@ -181,14 +181,22 @@ event.user_data.client_user_agent = eventModel.user_agent;
 
 
 // Commmon Event Schema Parameters
-event.user_data.em = eventModel['x-fb-ud-em'] || eventModel.user_data != null && hashFunction(eventModel.user_data.email_address);
-event.user_data.ph = eventModel['x-fb-ud-ph'] || eventModel.user_data != null && hashFunction(eventModel.user_data.phone_number);
-event.user_data.fn = eventModel['x-fb-ud-fn'] || eventModel.user_data != null && hashFunction(eventModel.user_data.address.first_name);
-event.user_data.ln = eventModel['x-fb-ud-ln'] || eventModel.user_data != null && hashFunction(eventModel.user_data.address.last_name);
-event.user_data.ct = eventModel['x-fb-ud-ct'] || eventModel.user_data != null && hashFunction(eventModel.user_data.address.city);
-event.user_data.st = eventModel['x-fb-ud-st'] || eventModel.user_data != null && hashFunction(eventModel.user_data.address.region);
-event.user_data.zp = eventModel['x-fb-ud-zp'] || eventModel.user_data != null && hashFunction(eventModel.user_data.address.postal_code);
-event.user_data.country = eventModel['x-fb-ud-country'] || eventModel.user_data != null && hashFunction(eventModel.user_data.address.country);
+event.user_data.em = eventModel['x-fb-ud-em'] ||
+                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.email_address) : null);
+event.user_data.ph = eventModel['x-fb-ud-ph'] ||
+                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.phone_number) : null);
+event.user_data.fn = eventModel['x-fb-ud-fn'] ||
+                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.first_name) : null);
+event.user_data.ln = eventModel['x-fb-ud-ln'] ||
+                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.last_name) : null);
+event.user_data.ct = eventModel['x-fb-ud-ct'] ||
+                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.city) : null);
+event.user_data.st = eventModel['x-fb-ud-st'] ||
+                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.region): null);
+event.user_data.zp = eventModel['x-fb-ud-zp'] ||
+                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.postal_code) : null);
+event.user_data.country = eventModel['x-fb-ud-country'] ||
+                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.country) : null);
 
 // Facebook Specific Parameters
 event.user_data.ge = eventModel['x-fb-ud-ge'];
@@ -207,7 +215,8 @@ event.custom_data.content_category = eventModel['x-fb-cd-content_category'];
 event.custom_data.content_ids = eventModel['x-fb-cd-content_ids'];
 event.custom_data.content_name = eventModel['x-fb-cd-content_name'];
 event.custom_data.content_type = eventModel['x-fb-cd-content_type'];
-event.custom_data.contents = eventModel['x-fb-cd-contents'] || eventModel.items != null && getContentFromItems(eventModel.items);
+event.custom_data.contents = eventModel['x-fb-cd-contents'] ||
+                                  (eventModel.items != null ? getContentFromItems(eventModel.items) : null);
 event.custom_data.num_items = eventModel['x-fb-cd-num_items'];
 event.custom_data.predicted_ltv = eventModel['x-fb-cd-predicted_ltv'];
 event.custom_data.status = eventModel['x-fb-cd-status'];
@@ -567,6 +576,16 @@ scenarios:
       assertThat(actual_contents[i].quantity).isEqualTo(items[i].quantity);
       assertThat(actual_contents[i].category).isEqualTo(items[i].item_category);
     }
+
+    // Act
+    mock('getAllEventData', () => {
+      inputEventModel.items = null;
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+
+    //Assert
+    assertThat(JSON.parse(httpBody).data[0].custom_data.contents).isEqualTo(null);
 setup: |-
   // Arrange
   const JSON = require('JSON');
