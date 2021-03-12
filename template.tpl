@@ -109,7 +109,6 @@ ___SANDBOXED_JS_FOR_SERVER___
 // Sandbox Javascript imports
 const getAllEventData = require('getAllEventData');
 const sendHttpRequest = require('sendHttpRequest');
-const logToConsole = require('logToConsole');
 const JSON = require('JSON');
 const Math = require('Math');
 const getTimestampMillis = require('getTimestampMillis');
@@ -241,7 +240,6 @@ const requestHeaders = {headers: {'content-type': 'application/json'}, method: '
 sendHttpRequest(
   graphEndpoint,
   (statusCode, headers, response) => {
-    logToConsole(JSON.stringify(response));
     if (statusCode >= 200 && statusCode < 300) {
       data.gtmOnSuccess();
       return;
@@ -250,9 +248,6 @@ sendHttpRequest(
   },
   requestHeaders,
   JSON.stringify(eventRequest));
-
-logToConsole('Fired Facebook Server Tag');
-
 
 ___SERVER_PERMISSIONS___
 
