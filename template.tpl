@@ -156,7 +156,7 @@ const snakeCaseToCamelCase = (name) => {
 
 const getFacebookEventName = (gtmEventName) => {
   // If the FB and GTM events differs only in casing, convert from snake case to upper case(FB Standard).
-  if(GTM_DIRECT_MAPPING_EVENTS.indexOf(gtmEventName) === 1) return snakeCaseToCamelCase(gtmEventName);
+  if(GTM_DIRECT_MAPPING_EVENTS.indexOf(gtmEventName) > -1) return snakeCaseToCamelCase(gtmEventName);
 
   if(gtmEventName == 'begin_checkout') return 'InitiateCheckout';
   if(gtmEventName == 'generate_lead') return 'Lead';
