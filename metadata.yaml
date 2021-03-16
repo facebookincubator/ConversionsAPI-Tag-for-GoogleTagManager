@@ -2,7 +2,7 @@ homepage: "https://facebook.com"
 documentation: "https://developers.facebook.com/docs/marketing-api/conversions-api"
 versions:
   # Initial Version for Conversions API Tag
-  - sha: f843bd06bf1acb1d82a4df9267429f5039fce3ea
+  - sha: 47daf13d1de21fbf2de68d4a2926581ee39d79a3
     changeNotes: Added support for GA4 Web Tag and Client to post event to Facebook Conversions API.
   # Older versions
   - sha: 329d13128703af9bad62090dc7ff6b19e57ed4cc
