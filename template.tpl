@@ -187,17 +187,17 @@ event.user_data.em = eventModel['x-fb-ud-em'] ||
 event.user_data.ph = eventModel['x-fb-ud-ph'] ||
                         (eventModel.user_data != null ? hashFunction(eventModel.user_data.phone_number) : null);
 event.user_data.fn = eventModel['x-fb-ud-fn'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.first_name) : null);
+                        (eventModel.user_data != null && eventModel.user_data.address != null ? hashFunction(eventModel.user_data.address.first_name) : null);
 event.user_data.ln = eventModel['x-fb-ud-ln'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.last_name) : null);
+                        (eventModel.user_data != null && eventModel.user_data.address != null ? hashFunction(eventModel.user_data.address.last_name) : null);
 event.user_data.ct = eventModel['x-fb-ud-ct'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.city) : null);
+                        (eventModel.user_data != null && eventModel.user_data.address != null ? hashFunction(eventModel.user_data.address.city) : null);
 event.user_data.st = eventModel['x-fb-ud-st'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.region): null);
+                        (eventModel.user_data != null && eventModel.user_data.address != null ? hashFunction(eventModel.user_data.address.region): null);
 event.user_data.zp = eventModel['x-fb-ud-zp'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.postal_code) : null);
+                        (eventModel.user_data != null && eventModel.user_data.address != null ? hashFunction(eventModel.user_data.address.postal_code) : null);
 event.user_data.country = eventModel['x-fb-ud-country'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.country) : null);
+                        (eventModel.user_data != null && eventModel.user_data.address != null ? hashFunction(eventModel.user_data.address.country) : null);
 
 // Facebook Specific Parameters
 event.user_data.ge = eventModel['x-fb-ud-ge'];
