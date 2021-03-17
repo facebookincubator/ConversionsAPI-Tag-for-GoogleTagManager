@@ -185,18 +185,14 @@ event.user_data.em = eventModel['x-fb-ud-em'] ||
                         (eventModel.user_data != null ? hashFunction(eventModel.user_data.email_address) : null);
 event.user_data.ph = eventModel['x-fb-ud-ph'] ||
                         (eventModel.user_data != null ? hashFunction(eventModel.user_data.phone_number) : null);
-event.user_data.fn = eventModel['x-fb-ud-fn'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.first_name) : null);
-event.user_data.ln = eventModel['x-fb-ud-ln'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.last_name) : null);
-event.user_data.ct = eventModel['x-fb-ud-ct'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.city) : null);
-event.user_data.st = eventModel['x-fb-ud-st'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.region): null);
-event.user_data.zp = eventModel['x-fb-ud-zp'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.postal_code) : null);
-event.user_data.country = eventModel['x-fb-ud-country'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.country) : null);
+
+const addressData = (eventModel.user_data != null && eventModel.user_data.address != null) ? eventModel.user_data.address : {};
+event.user_data.fn = eventModel['x-fb-ud-fn'] || hashFunction(addressData.first_name);
+event.user_data.ln = eventModel['x-fb-ud-ln'] || hashFunction(addressData.last_name);
+event.user_data.ct = eventModel['x-fb-ud-ct'] || hashFunction(addressData.city);
+event.user_data.st = eventModel['x-fb-ud-st'] || hashFunction(addressData.region);
+event.user_data.zp = eventModel['x-fb-ud-zp'] || hashFunction(addressData.postal_code);
+event.user_data.country = eventModel['x-fb-ud-country'] || hashFunction(addressData.country);
 
 // Facebook Specific Parameters
 event.user_data.ge = eventModel['x-fb-ud-ge'];
@@ -561,6 +557,33 @@ scenarios:
 
     //Assert
     assertThat(JSON.parse(httpBody).data[0].custom_data.contents).isEqualTo(null);
+- name: When address is missing it skips parsing the nested fields
+  code: |
+    mock('getAllEventData', () => {
+      inputEventModel['x-fb-ud-em'] = null;
+      inputEventModel['x-fb-ud-ph'] = null;
+      inputEventModel['x-fb-ud-fn'] = null;
+      inputEventModel['x-fb-ud-ln'] = null;
+      inputEventModel['x-fb-ud-ct'] = null;
+      inputEventModel['x-fb-ud-st'] = null;
+      inputEventModel['x-fb-ud-zp'] = null;
+      inputEventModel['x-fb-ud-country'] = null;
+      inputEventModel.user_data = {};
+      inputEventModel.user_data.email_address = 'foo@bar.com';
+      inputEventModel.user_data.phone_number = '1234567890';
+      return inputEventModel;
+    });
+
+    runCode(testConfigurationData);
+
+    assertThat(JSON.parse(httpBody).data[0].user_data.em).isEqualTo(hashFunction('foo@bar.com'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.ph).isEqualTo(hashFunction('1234567890'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.fn).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.ln).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.ct).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.st).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.zp).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.country).isUndefined();
 setup: |-
   // Arrange
   const JSON = require('JSON');
