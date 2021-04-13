@@ -129,7 +129,7 @@ const GTM_EVENT_MAPPINGS = {
   "begin_checkout": "InitiateCheckout",
   "generate_lead": "Lead",
   "view_item": "ViewContent",
-  "signup": "CompleteRegistration"
+  "sign_up": "CompleteRegistration"
 };
 
 function isAlreadyHashed(input){
