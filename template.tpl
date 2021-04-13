@@ -119,7 +119,18 @@ const getCookieValues = require('getCookieValues');
 const API_ENDPOINT = 'https://graph.facebook.com';
 const API_VERSION = 'v10.0';
 const PARTNER_AGENT = 'gtmss-1.0.0-0.0.3';
-const GTM_DIRECT_MAPPING_EVENTS = ['add_payment_info', 'add_to_cart', 'add_to_wishlist', 'page_view', 'purchase', 'search'];
+const GTM_EVENT_MAPPINGS = {
+  "add_payment_info": "AddPaymentInfo",
+  "add_to_cart": "AddToCart",
+  "add_to_wishlist": "AddToWishlist",
+  "page_view": "PageView",
+  "purchase": "Purchase",
+  "search": "Search",
+  "begin_checkout": "InitiateCheckout",
+  "generate_lead": "Lead",
+  "view_item": "ViewContent",
+  "signup": "CompleteRegistration"
+};
 
 function isAlreadyHashed(input){
   return input && (input.match('^[A-Fa-f0-9]{64}$') != null);
@@ -147,23 +158,11 @@ function getContentFromItems(items) {
     });
 }
 
-// Mapping common Event Model data into Conversions API schema
-const snakeCaseToCamelCase = (name) => {
-                    return name.split('_')
-                               .map((w) => w.length ? w.slice(0, 1).toUpperCase() + w.slice(1) : w)
-                               .join('');
-                    };
+function getFacebookEventName(gtmEventName) {
+  return GTM_EVENT_MAPPINGS[gtmEventName] || gtmEventName;
+}
 
-const getFacebookEventName = (gtmEventName) => {
-  // If the FB and GTM events differs only in casing, convert from snake case to upper case(FB Standard).
-  if(GTM_DIRECT_MAPPING_EVENTS.indexOf(gtmEventName) === 1) return snakeCaseToCamelCase(gtmEventName);
 
-  if(gtmEventName == 'begin_checkout') return 'InitiateCheckout';
-  if(gtmEventName == 'generate_lead') return 'Lead';
-  if(gtmEventName == 'view_item') return 'ViewContent';
-  if(gtmEventName == 'signup') return 'CompleteRegistration';
-  return gtmEventName;
-};
 
 const eventModel = getAllEventData();
 const event = {};
@@ -186,18 +185,14 @@ event.user_data.em = eventModel['x-fb-ud-em'] ||
                         (eventModel.user_data != null ? hashFunction(eventModel.user_data.email_address) : null);
 event.user_data.ph = eventModel['x-fb-ud-ph'] ||
                         (eventModel.user_data != null ? hashFunction(eventModel.user_data.phone_number) : null);
-event.user_data.fn = eventModel['x-fb-ud-fn'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.first_name) : null);
-event.user_data.ln = eventModel['x-fb-ud-ln'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.last_name) : null);
-event.user_data.ct = eventModel['x-fb-ud-ct'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.city) : null);
-event.user_data.st = eventModel['x-fb-ud-st'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.region): null);
-event.user_data.zp = eventModel['x-fb-ud-zp'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.postal_code) : null);
-event.user_data.country = eventModel['x-fb-ud-country'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.address.country) : null);
+
+const addressData = (eventModel.user_data != null && eventModel.user_data.address != null) ? eventModel.user_data.address : {};
+event.user_data.fn = eventModel['x-fb-ud-fn'] || hashFunction(addressData.first_name);
+event.user_data.ln = eventModel['x-fb-ud-ln'] || hashFunction(addressData.last_name);
+event.user_data.ct = eventModel['x-fb-ud-ct'] || hashFunction(addressData.city);
+event.user_data.st = eventModel['x-fb-ud-st'] || hashFunction(addressData.region);
+event.user_data.zp = eventModel['x-fb-ud-zp'] || hashFunction(addressData.postal_code);
+event.user_data.country = eventModel['x-fb-ud-country'] || hashFunction(addressData.country);
 
 // Facebook Specific Parameters
 event.user_data.ge = eventModel['x-fb-ud-ge'];
@@ -393,13 +388,13 @@ scenarios:
   code: |-
     // Act
     mock('getAllEventData', () => {
-      inputEventModel.event_name = 'add_to_cart';
+      inputEventModel.event_name = 'add_to_wishlist';
       return inputEventModel;
     });
     runCode(testConfigurationData);
 
     //Assert
-    assertThat(JSON.parse(httpBody).data[0].event_name).isEqualTo('AddToCart');
+    assertThat(JSON.parse(httpBody).data[0].event_name).isEqualTo('AddToWishlist');
 
 
     // Act
@@ -562,11 +557,37 @@ scenarios:
 
     //Assert
     assertThat(JSON.parse(httpBody).data[0].custom_data.contents).isEqualTo(null);
+- name: When address is missing it skips parsing the nested fields
+  code: |
+    mock('getAllEventData', () => {
+      inputEventModel['x-fb-ud-em'] = null;
+      inputEventModel['x-fb-ud-ph'] = null;
+      inputEventModel['x-fb-ud-fn'] = null;
+      inputEventModel['x-fb-ud-ln'] = null;
+      inputEventModel['x-fb-ud-ct'] = null;
+      inputEventModel['x-fb-ud-st'] = null;
+      inputEventModel['x-fb-ud-zp'] = null;
+      inputEventModel['x-fb-ud-country'] = null;
+      inputEventModel.user_data = {};
+      inputEventModel.user_data.email_address = 'foo@bar.com';
+      inputEventModel.user_data.phone_number = '1234567890';
+      return inputEventModel;
+    });
+
+    runCode(testConfigurationData);
+
+    assertThat(JSON.parse(httpBody).data[0].user_data.em).isEqualTo(hashFunction('foo@bar.com'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.ph).isEqualTo(hashFunction('1234567890'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.fn).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.ln).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.ct).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.st).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.zp).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.country).isUndefined();
 setup: |-
   // Arrange
   const JSON = require('JSON');
   const Math = require('Math');
-  const logToConsole = require('logToConsole');
   const getTimestampMillis = require('getTimestampMillis');
   const sha256Sync = require('sha256Sync');
 
