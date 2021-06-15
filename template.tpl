@@ -117,8 +117,8 @@ const getCookieValues = require('getCookieValues');
 
 // Constants
 const API_ENDPOINT = 'https://graph.facebook.com';
-const API_VERSION = 'v10.0';
-const PARTNER_AGENT = 'gtmss-1.0.0-0.0.3';
+const API_VERSION = 'v11.0';
+const PARTNER_AGENT = 'gtmss-1.0.0-0.0.4';
 const GTM_EVENT_MAPPINGS = {
   "add_payment_info": "AddPaymentInfo",
   "add_to_cart": "AddToCart",
@@ -720,8 +720,8 @@ setup: |-
   });
 
   const apiEndpoint = 'https://graph.facebook.com';
-  const apiVersion = 'v10.0';
-  const partnerAgent = 'gtmss-1.0.0-0.0.3';
+  const apiVersion = 'v11.0';
+  const partnerAgent = 'gtmss-1.0.0-0.0.4';
 
   const routeParams = 'events?access_token=' + testConfigurationData.apiAccessToken;
   const requestEndpoint = [apiEndpoint,
