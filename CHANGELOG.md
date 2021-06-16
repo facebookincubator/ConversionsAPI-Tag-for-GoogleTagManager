@@ -1,4 +1,6 @@
 ## Unreleased
+
+## Released
 0.0.4 (Jun 15, 2021)
 * Update Conversions API Graph version to v11.0
 
