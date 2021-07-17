@@ -123,6 +123,7 @@ const GTM_EVENT_MAPPINGS = {
   "add_payment_info": "AddPaymentInfo",
   "add_to_cart": "AddToCart",
   "add_to_wishlist": "AddToWishlist",
+  "gtm.dom": "PageView",
   "page_view": "PageView",
   "purchase": "Purchase",
   "search": "Search",

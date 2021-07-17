@@ -1,4 +1,5 @@
 ## Unreleased
+* Map gtm.dom event_names to PageView
 
 ## Released
 0.0.4 (Jun 15, 2021)
