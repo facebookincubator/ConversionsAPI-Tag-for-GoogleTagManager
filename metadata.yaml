@@ -2,6 +2,9 @@ homepage: "https://developers.facebook.com/docs/marketing-api/conversions-api"
 documentation: "https://developers.facebook.com/docs/marketing-api/conversions-api/guides/gtm-server-side"
 versions:
   # Latest
+  - sha: 1c8df2efbf77f0913863399ada05ae5c6895636d
+    changeNotes: Map gtm.dom event_names to PageView
+  # Older versions
   - sha: 6ea79a611f497daabc37cce5d0ed1447685cc930
     changeNotes: Updated to latest Graph API v11.0
   - sha: f344a4c9e09aa135ecdb5aa7c945e698efce12c4
@@ -9,6 +12,5 @@ versions:
   # Initial "Public" Version for Conversions API Tag
   - sha: 47daf13d1de21fbf2de68d4a2926581ee39d79a3
     changeNotes: Added support for GA4 Web Tag and Client to post event to Facebook Conversions API.
-  # Older versions
   - sha: 329d13128703af9bad62090dc7ff6b19e57ed4cc
     changeNotes: Adding support for converting common event model with Facebook Pixel specific parameters to Conversions API.

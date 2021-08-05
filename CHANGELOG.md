@@ -1,8 +1,9 @@
 ## Unreleased
-0.0.5
-* Map gtm.dom event_names to PageView
 
 ## Released
+0.0.5 (Aug 5, 2021)
+* Map gtm.dom event_names to PageView
+
 0.0.4 (Jun 15, 2021)
 * Update Conversions API Graph version to v11.0
 
