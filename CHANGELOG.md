@@ -1,4 +1,5 @@
 ## Unreleased
+0.0.5
 * Map gtm.dom event_names to PageView
 
 ## Released
