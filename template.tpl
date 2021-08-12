@@ -219,6 +219,19 @@ event.custom_data.predicted_ltv = eventModel['x-fb-cd-predicted_ltv'];
 event.custom_data.status = eventModel['x-fb-cd-status'];
 event.custom_data.delivery_category = eventModel['x-fb-cd-delivery_category'];
 
+const customEventParameterPattern = 'x-fb-cd-custom-';
+for (const property in eventModel) {
+  if (
+    property.indexOf(customEventParameterPattern) === 0 &&
+    property.length > customEventParameterPattern.length
+  ) {
+    const customEventParameterName = property.slice(
+      customEventParameterPattern.length
+    );
+    event.custom_data[customEventParameterName] = eventModel[property];
+  }
+}
+
 const eventRequest = {data: [event], partner_agent: PARTNER_AGENT};
 
 if(eventModel.test_event_code || data.testEventCode) {
@@ -585,6 +598,18 @@ scenarios:
     assertThat(JSON.parse(httpBody).data[0].user_data.st).isUndefined();
     assertThat(JSON.parse(httpBody).data[0].user_data.zp).isUndefined();
     assertThat(JSON.parse(httpBody).data[0].user_data.country).isUndefined();
+- name: on event with eventModel x-fb-cd-custom-custom_field_name, adds custom_field_name
+    to custom_data
+  code: |-
+    // Act
+    mock('getAllEventData', () => {
+      inputEventModel['x-fb-cd-custom-example_field'] = 'example_value';
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+
+    //Assert
+    assertThat(JSON.parse(httpBody).data[0].custom_data.example_field).isEqualTo(inputEventModel['x-fb-cd-custom-example_field']);
 setup: |-
   // Arrange
   const JSON = require('JSON');
