@@ -117,7 +117,7 @@ const getCookieValues = require('getCookieValues');
 
 // Constants
 const API_ENDPOINT = 'https://graph.facebook.com';
-const API_VERSION = 'v11.0';
+const API_VERSION = 'v12.0';
 const PARTNER_AGENT = 'gtmss-1.0.0-0.0.5';
 const GTM_EVENT_MAPPINGS = {
   "add_payment_info": "AddPaymentInfo",
