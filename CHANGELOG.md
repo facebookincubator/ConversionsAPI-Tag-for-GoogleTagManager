@@ -1,6 +1,10 @@
 ## Unreleased
 
 ## Released
+
+0.0.6 (Jan 24, 2022)
+* Upgrading Facebook references to Meta.
+
 0.0.5 (Aug 5, 2021)
 * Map gtm.dom event_names to PageView
 
