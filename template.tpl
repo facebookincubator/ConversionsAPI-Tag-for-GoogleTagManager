@@ -107,6 +107,7 @@ ___SANDBOXED_JS_FOR_SERVER___
 
 // Sandbox Javascript imports
 const getAllEventData = require('getAllEventData');
+const getType = require('getType');
 const sendHttpRequest = require('sendHttpRequest');
 const JSON = require('JSON');
 const Math = require('Math');
@@ -138,6 +139,12 @@ function isAlreadyHashed(input){
 
 
 function hashFunction(input){
+  const type = getType(input);
+
+  if(type == 'undefined' || input == 'undefined') {
+    return undefined;
+  }
+
   if(input == null || isAlreadyHashed(input)){
     return input;
   }
@@ -584,6 +591,40 @@ scenarios:
     assertThat(JSON.parse(httpBody).data[0].user_data.st).isUndefined();
     assertThat(JSON.parse(httpBody).data[0].user_data.zp).isUndefined();
     assertThat(JSON.parse(httpBody).data[0].user_data.country).isUndefined();
+- name: When parameters are undefined skip parsing
+  code: |
+    mock('getAllEventData', () => {
+      inputEventModel['x-fb-ud-em'] = null;
+      inputEventModel['x-fb-ud-ph'] = null;
+      inputEventModel['x-fb-ud-fn'] = null;
+      inputEventModel['x-fb-ud-ln'] = null;
+      inputEventModel['x-fb-ud-ct'] = null;
+      inputEventModel['x-fb-ud-st'] = null;
+      inputEventModel['x-fb-ud-zp'] = null;
+      inputEventModel['x-fb-ud-country'] = null;
+      inputEventModel.user_data = {};
+      inputEventModel.user_data.email_address = undefined;
+      inputEventModel.user_data.phone_number = '1234567890';
+      inputEventModel.user_data.address = {};
+      inputEventModel.user_data.address.first_name = 'John';
+      inputEventModel.user_data.address.last_name = undefined;
+      inputEventModel.user_data.address.city = 'menlopark';
+      inputEventModel.user_data.address.region = 'ca';
+      inputEventModel.user_data.address.postal_code = '94025';
+      inputEventModel.user_data.address.country = 'usa';
+      return inputEventModel;
+    });
+
+    runCode(testConfigurationData);
+
+    assertThat(JSON.parse(httpBody).data[0].user_data.em).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.ph).isEqualTo(hashFunction('1234567890'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.fn).isEqualTo(hashFunction('John'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.ln).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.ct).isEqualTo(hashFunction('menlopark'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.st).isEqualTo(hashFunction('ca'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.zp).isEqualTo(hashFunction('94025'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.country).isEqualTo(hashFunction('usa'));
 setup: |-
   // Arrange
   const JSON = require('JSON');
