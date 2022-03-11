@@ -99,6 +99,12 @@ ___TEMPLATE_PARAMETERS___
     ],
     "simpleValueType": true,
     "help": "This field allows you to specify where your conversions occurred. Knowing where your events took place helps ensure your ads go to the right people. See \u003ca href\u003d\"https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/server-event#action-source\"\u003ehere\u003c/a\u003e for more information."
+  },
+  {
+    "type": "CHECKBOX",
+    "name": "extendCookies",
+    "checkboxText": "Extend Meta Pixel cookies (fbp/fbp)",
+    "simpleValueType": true
   }
 ]
 
@@ -114,11 +120,15 @@ const Math = require('Math');
 const getTimestampMillis = require('getTimestampMillis');
 const sha256Sync = require('sha256Sync');
 const getCookieValues = require('getCookieValues');
+const setCookie = require('setCookie');
+const decodeUriComponent = require('decodeUriComponent');
+const parseUrl = require('parseUrl');
+const computeEffectiveTldPlusOne = require('computeEffectiveTldPlusOne');
 
 // Constants
 const API_ENDPOINT = 'https://graph.facebook.com';
 const API_VERSION = 'v12.0';
-const PARTNER_AGENT = 'gtmss-1.0.0-0.0.5';
+const PARTNER_AGENT = 'gtmss-1.0.0-0.0.6';
 const GTM_EVENT_MAPPINGS = {
   "add_payment_info": "AddPaymentInfo",
   "add_to_cart": "AddToCart",
@@ -137,6 +147,29 @@ function isAlreadyHashed(input){
   return input && (input.match('^[A-Fa-f0-9]{64}$') != null);
 }
 
+function setFbCookie(name, value, expire) {
+  setCookie(name, value, {
+    domain: 'auto',
+    path: '/',
+    samesite: 'Lax',
+    secure: true,
+    'max-age': expire || 7776000, // default to 90 days
+    httpOnly: false
+  });
+}
+
+function getFbcValue() {
+  let fbc = eventModel['x-fb-ck-fbc'] || getCookieValues('_fbc', true)[0];
+  const url = eventModel.page_location;
+  const subDomainIndex = url ? computeEffectiveTldPlusOne(url).split('.').length - 1 : 1;
+  const parsedUrl = parseUrl(url);
+
+  if (parsedUrl && parsedUrl.searchParams.fbclid) {
+    fbc = 'fb.' + subDomainIndex + '.' + getTimestampMillis() + '.' + decodeUriComponent(parsedUrl.searchParams.fbclid);
+  }
+
+  return fbc;
+}
 
 function hashFunction(input){
   const type = getType(input);
@@ -168,8 +201,6 @@ function getContentFromItems(items) {
 function getFacebookEventName(gtmEventName) {
   return GTM_EVENT_MAPPINGS[gtmEventName] || gtmEventName;
 }
-
-
 
 const eventModel = getAllEventData();
 const event = {};
@@ -207,7 +238,7 @@ event.user_data.db = eventModel['x-fb-ud-db'];
 event.user_data.external_id = eventModel['x-fb-ud-external_id'];
 event.user_data.subscription_id = eventModel['x-fb-ud-subscription_id'];
 event.user_data.fbp = eventModel['x-fb-ck-fbp'] || getCookieValues('_fbp', true)[0];
-event.user_data.fbc = eventModel['x-fb-ck-fbc'] || getCookieValues('_fbc', true)[0];
+event.user_data.fbc = getFbcValue();
 
 event.custom_data = {};
 event.custom_data.currency = eventModel.currency;
@@ -243,13 +274,22 @@ sendHttpRequest(
   graphEndpoint,
   (statusCode, headers, response) => {
     if (statusCode >= 200 && statusCode < 300) {
+      if (data.extendCookies && event.user_data.fbc) {
+        setFbCookie('_fbc', event.user_data.fbc);
+      }
+
+      if (data.extendCookies && event.user_data.fbp) {
+        setFbCookie('_fbp', event.user_data.fbp);
+      }
+
       data.gtmOnSuccess();
-      return;
+    } else {
+      data.gtmOnFailure();
     }
-    data.gtmOnFailure();
   },
   requestHeaders,
-  JSON.stringify(eventRequest));
+  JSON.stringify(eventRequest)
+);
 
 ___SERVER_PERMISSIONS___
 
@@ -344,7 +384,123 @@ ___SERVER_PERMISSIONS___
       "isEditedByUser": true
     },
     "isRequired": true
-  }
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "set_cookies",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "allowedCookies",
+          "value": {
+            "type": 2,
+            "listItem": [
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "name"
+                  },
+                  {
+                    "type": 1,
+                    "string": "domain"
+                  },
+                  {
+                    "type": 1,
+                    "string": "path"
+                  },
+                  {
+                    "type": 1,
+                    "string": "secure"
+                  },
+                  {
+                    "type": 1,
+                    "string": "session"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "_fbc"
+                  },
+                  {
+                    "type": 1,
+                    "string": "*"
+                  },
+                  {
+                    "type": 1,
+                    "string": "*"
+                  },
+                  {
+                    "type": 1,
+                    "string": "any"
+                  },
+                  {
+                    "type": 1,
+                    "string": "any"
+                  }
+                ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "name"
+                  },
+                  {
+                    "type": 1,
+                    "string": "domain"
+                  },
+                  {
+                    "type": 1,
+                    "string": "path"
+                  },
+                  {
+                    "type": 1,
+                    "string": "secure"
+                  },
+                  {
+                    "type": 1,
+                    "string": "session"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "_fbp"
+                  },
+                  {
+                    "type": 1,
+                    "string": "*"
+                  },
+                  {
+                    "type": 1,
+                    "string": "*"
+                  },
+                  {
+                    "type": 1,
+                    "string": "any"
+                  },
+                  {
+                    "type": 1,
+                    "string": "any"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "clientAnnotations": {
+      "isEditedByUser": true
+    },
+    "isRequired": true
+  },
 ]
 
 
@@ -625,6 +781,35 @@ scenarios:
     assertThat(JSON.parse(httpBody).data[0].user_data.st).isEqualTo(hashFunction('ca'));
     assertThat(JSON.parse(httpBody).data[0].user_data.zp).isEqualTo(hashFunction('94025'));
     assertThat(JSON.parse(httpBody).data[0].user_data.country).isEqualTo(hashFunction('usa'));
+
+- name: Set Meta cookies (fbp / fbc) if "extendCookies" checkbox is ticked
+  code: |
+    runCode({
+      pixelId: '123',
+      apiAccessToken: 'abc',
+      testEventCode: 'test123',
+      actionSource: 'source123',
+      extendCookies: true
+    });
+
+    //Assert
+    assertApi('setCookie').wasCalled();
+    assertApi('gtmOnSuccess').wasCalled();
+
+- name: Do not set Meta cookies (fbp / fbc) if "extendCookies" checkbox is ticked
+  code: |
+    runCode({
+      pixelId: '123',
+      apiAccessToken: 'abc',
+      testEventCode: 'test123',
+      actionSource: 'source123',
+      extendCookies: false
+    });
+
+    //Assert
+    assertApi('setCookie').wasNotCalled();
+    assertApi('gtmOnSuccess').wasCalled();
+
 setup: |-
   // Arrange
   const JSON = require('JSON');
@@ -762,7 +947,7 @@ setup: |-
 
   const apiEndpoint = 'https://graph.facebook.com';
   const apiVersion = 'v12.0';
-  const partnerAgent = 'gtmss-1.0.0-0.0.4';
+  const partnerAgent = 'gtmss-1.0.0-0.0.6';
 
   const routeParams = 'events?access_token=' + testConfigurationData.apiAccessToken;
   const requestEndpoint = [apiEndpoint,
