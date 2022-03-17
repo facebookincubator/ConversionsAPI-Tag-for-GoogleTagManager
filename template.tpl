@@ -221,8 +221,10 @@ event.user_data.client_user_agent = eventModel.user_agent;
 // Commmon Event Schema Parameters
 event.user_data.em = eventModel['x-fb-ud-em'] ||
                         (eventModel.user_data != null ? hashFunction(eventModel.user_data.email_address) : null);
+// strip leading + from phone_number if provided in user_data
 event.user_data.ph = eventModel['x-fb-ud-ph'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.phone_number) : null);
+  (eventModel.user_data != null ? (eventModel.user_data.phone_number != null ? hashFunction(eventModel.user_data.phone_number.replace(/^\+/, "")) : null)
+    : null);
 
 const addressData = (eventModel.user_data != null && eventModel.user_data.address != null) ? eventModel.user_data.address : {};
 event.user_data.fn = eventModel['x-fb-ud-fn'] || hashFunction(addressData.first_name);
