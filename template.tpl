@@ -103,7 +103,7 @@ ___TEMPLATE_PARAMETERS___
   {
     "type": "CHECKBOX",
     "name": "extendCookies",
-    "checkboxText": "Extend Meta Pixel cookies (fbp/fbp)",
+    "checkboxText": "Extend Meta Pixel cookies (fbp/fbc)",
     "simpleValueType": true
   }
 ]
