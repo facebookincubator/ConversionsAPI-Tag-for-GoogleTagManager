@@ -13,13 +13,12 @@ ___INFO___
   "id": "cvt_temp_public_id",
   "version": 1,
   "securityGroups": [],
-  "displayName": "Facebook Conversions API Tag",
+  "displayName": "Conversions API Tag",
   "brand": {
     "id": "brand_dummy",
-    "displayName": "Facebook",
-    "thumbnail": "data:image/jpeg;base64,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\u003d\u003d"
+    "displayName": ""
   },
-  "description": "A server-side tag template that prepares information from your tagging server to be sent through Facebook’s Conversions API.",
+  "description": "A server-side tag template that prepares information from your tagging server to be sent through Conversions API.",
   "containerContexts": [
     "SERVER"
   ]
@@ -57,7 +56,7 @@ ___TEMPLATE_PARAMETERS___
     "name": "testEventCode",
     "displayName": "Test Event Code",
     "simpleValueType": true,
-    "help": "Code used to verify that your server events are received correctly by Facebook. Use this code to test your server events in the Test Events feature in Events Manager. See \u003ca href\u003d\"https://developers.facebook.com/docs/marketing-api/conversions-api/using-the-api#testEvents\"\u003e Test Events Tool\u003c/a\u003e for an example."
+    "help": "Code used to verify that your server events are received correctly by Conversions API. Use this code to test your server events in the Test Events feature in Events Manager. See \u003ca href\u003d\"https://developers.facebook.com/docs/marketing-api/conversions-api/using-the-api#testEvents\"\u003e Test Events Tool\u003c/a\u003e for an example."
   },
   {
     "type": "SELECT",
@@ -100,6 +99,12 @@ ___TEMPLATE_PARAMETERS___
     ],
     "simpleValueType": true,
     "help": "This field allows you to specify where your conversions occurred. Knowing where your events took place helps ensure your ads go to the right people. See \u003ca href\u003d\"https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/server-event#action-source\"\u003ehere\u003c/a\u003e for more information."
+  },
+  {
+    "type": "CHECKBOX",
+    "name": "extendCookies",
+    "checkboxText": "Extend Meta Pixel cookies (fbp/fbc)",
+    "simpleValueType": true
   }
 ]
 
@@ -108,17 +113,22 @@ ___SANDBOXED_JS_FOR_SERVER___
 
 // Sandbox Javascript imports
 const getAllEventData = require('getAllEventData');
+const getType = require('getType');
 const sendHttpRequest = require('sendHttpRequest');
 const JSON = require('JSON');
 const Math = require('Math');
 const getTimestampMillis = require('getTimestampMillis');
 const sha256Sync = require('sha256Sync');
 const getCookieValues = require('getCookieValues');
+const setCookie = require('setCookie');
+const decodeUriComponent = require('decodeUriComponent');
+const parseUrl = require('parseUrl');
+const computeEffectiveTldPlusOne = require('computeEffectiveTldPlusOne');
 
 // Constants
 const API_ENDPOINT = 'https://graph.facebook.com';
-const API_VERSION = 'v11.0';
-const PARTNER_AGENT = 'gtmss-1.0.0-0.0.5';
+const API_VERSION = 'v12.0';
+const PARTNER_AGENT = 'gtmss-1.0.0-0.0.6';
 const GTM_EVENT_MAPPINGS = {
   "add_payment_info": "AddPaymentInfo",
   "add_to_cart": "AddToCart",
@@ -137,8 +147,37 @@ function isAlreadyHashed(input){
   return input && (input.match('^[A-Fa-f0-9]{64}$') != null);
 }
 
+function setFbCookie(name, value, expire) {
+  setCookie(name, value, {
+    domain: 'auto',
+    path: '/',
+    samesite: 'Lax',
+    secure: true,
+    'max-age': expire || 7776000, // default to 90 days
+    httpOnly: false
+  });
+}
+
+function getFbcValue() {
+  let fbc = eventModel['x-fb-ck-fbc'] || getCookieValues('_fbc', true)[0];
+  const url = eventModel.page_location;
+  const subDomainIndex = url ? computeEffectiveTldPlusOne(url).split('.').length - 1 : 1;
+  const parsedUrl = parseUrl(url);
+
+  if (parsedUrl && parsedUrl.searchParams.fbclid) {
+    fbc = 'fb.' + subDomainIndex + '.' + getTimestampMillis() + '.' + decodeUriComponent(parsedUrl.searchParams.fbclid);
+  }
+
+  return fbc;
+}
 
 function hashFunction(input){
+  const type = getType(input);
+
+  if(type == 'undefined' || input == 'undefined') {
+    return undefined;
+  }
+
   if(input == null || isAlreadyHashed(input)){
     return input;
   }
@@ -162,8 +201,6 @@ function getContentFromItems(items) {
 function getFacebookEventName(gtmEventName) {
   return GTM_EVENT_MAPPINGS[gtmEventName] || gtmEventName;
 }
-
-
 
 const eventModel = getAllEventData();
 const event = {};
@@ -195,13 +232,13 @@ event.user_data.st = eventModel['x-fb-ud-st'] || hashFunction(addressData.region
 event.user_data.zp = eventModel['x-fb-ud-zp'] || hashFunction(addressData.postal_code);
 event.user_data.country = eventModel['x-fb-ud-country'] || hashFunction(addressData.country);
 
-// Facebook Specific Parameters
+// Conversions API Specific Parameters
 event.user_data.ge = eventModel['x-fb-ud-ge'];
 event.user_data.db = eventModel['x-fb-ud-db'];
 event.user_data.external_id = eventModel['x-fb-ud-external_id'];
 event.user_data.subscription_id = eventModel['x-fb-ud-subscription_id'];
 event.user_data.fbp = eventModel['x-fb-ck-fbp'] || getCookieValues('_fbp', true)[0];
-event.user_data.fbc = eventModel['x-fb-ck-fbc'] || getCookieValues('_fbc', true)[0];
+event.user_data.fbc = getFbcValue();
 
 event.custom_data = {};
 event.custom_data.currency = eventModel.currency;
@@ -250,13 +287,22 @@ sendHttpRequest(
   graphEndpoint,
   (statusCode, headers, response) => {
     if (statusCode >= 200 && statusCode < 300) {
+      if (data.extendCookies && event.user_data.fbc) {
+        setFbCookie('_fbc', event.user_data.fbc);
+      }
+
+      if (data.extendCookies && event.user_data.fbp) {
+        setFbCookie('_fbp', event.user_data.fbp);
+      }
+
       data.gtmOnSuccess();
-      return;
+    } else {
+      data.gtmOnFailure();
     }
-    data.gtmOnFailure();
   },
   requestHeaders,
-  JSON.stringify(eventRequest));
+  JSON.stringify(eventRequest)
+);
 
 ___SERVER_PERMISSIONS___
 
@@ -351,7 +397,123 @@ ___SERVER_PERMISSIONS___
       "isEditedByUser": true
     },
     "isRequired": true
-  }
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "set_cookies",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "allowedCookies",
+          "value": {
+            "type": 2,
+            "listItem": [
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "name"
+                  },
+                  {
+                    "type": 1,
+                    "string": "domain"
+                  },
+                  {
+                    "type": 1,
+                    "string": "path"
+                  },
+                  {
+                    "type": 1,
+                    "string": "secure"
+                  },
+                  {
+                    "type": 1,
+                    "string": "session"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "_fbc"
+                  },
+                  {
+                    "type": 1,
+                    "string": "*"
+                  },
+                  {
+                    "type": 1,
+                    "string": "*"
+                  },
+                  {
+                    "type": 1,
+                    "string": "any"
+                  },
+                  {
+                    "type": 1,
+                    "string": "any"
+                  }
+                ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "name"
+                  },
+                  {
+                    "type": 1,
+                    "string": "domain"
+                  },
+                  {
+                    "type": 1,
+                    "string": "path"
+                  },
+                  {
+                    "type": 1,
+                    "string": "secure"
+                  },
+                  {
+                    "type": 1,
+                    "string": "session"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "_fbp"
+                  },
+                  {
+                    "type": 1,
+                    "string": "*"
+                  },
+                  {
+                    "type": 1,
+                    "string": "*"
+                  },
+                  {
+                    "type": 1,
+                    "string": "any"
+                  },
+                  {
+                    "type": 1,
+                    "string": "any"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "clientAnnotations": {
+      "isEditedByUser": true
+    },
+    "isRequired": true
+  },
 ]
 
 
@@ -398,7 +560,7 @@ scenarios:
     //Assert
     assertThat(JSON.parse(httpBody).data[0].action_source).isEqualTo(inputEventModel.action_source);
 - name: on receiving event, if GTM Standard Event then Tag converts to corresponding
-    Facebook Event, passes through as-is if otherwise
+    Conversions API Event, passes through as-is if otherwise
   code: |-
     // Act
     mock('getAllEventData', () => {
@@ -610,6 +772,69 @@ scenarios:
 
     //Assert
     assertThat(JSON.parse(httpBody).data[0].custom_data.example_field).isEqualTo(inputEventModel['x-fb-cd-custom-example_field']);
+- name: When parameters are undefined skip parsing
+  code: |
+    mock('getAllEventData', () => {
+      inputEventModel['x-fb-ud-em'] = null;
+      inputEventModel['x-fb-ud-ph'] = null;
+      inputEventModel['x-fb-ud-fn'] = null;
+      inputEventModel['x-fb-ud-ln'] = null;
+      inputEventModel['x-fb-ud-ct'] = null;
+      inputEventModel['x-fb-ud-st'] = null;
+      inputEventModel['x-fb-ud-zp'] = null;
+      inputEventModel['x-fb-ud-country'] = null;
+      inputEventModel.user_data = {};
+      inputEventModel.user_data.email_address = undefined;
+      inputEventModel.user_data.phone_number = '1234567890';
+      inputEventModel.user_data.address = {};
+      inputEventModel.user_data.address.first_name = 'John';
+      inputEventModel.user_data.address.last_name = undefined;
+      inputEventModel.user_data.address.city = 'menlopark';
+      inputEventModel.user_data.address.region = 'ca';
+      inputEventModel.user_data.address.postal_code = '94025';
+      inputEventModel.user_data.address.country = 'usa';
+      return inputEventModel;
+    });
+
+    runCode(testConfigurationData);
+
+    assertThat(JSON.parse(httpBody).data[0].user_data.em).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.ph).isEqualTo(hashFunction('1234567890'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.fn).isEqualTo(hashFunction('John'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.ln).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.ct).isEqualTo(hashFunction('menlopark'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.st).isEqualTo(hashFunction('ca'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.zp).isEqualTo(hashFunction('94025'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.country).isEqualTo(hashFunction('usa'));
+
+- name: Set Meta cookies (fbp / fbc) if "extendCookies" checkbox is ticked
+  code: |
+    runCode({
+      pixelId: '123',
+      apiAccessToken: 'abc',
+      testEventCode: 'test123',
+      actionSource: 'source123',
+      extendCookies: true
+    });
+
+    //Assert
+    assertApi('setCookie').wasCalled();
+    assertApi('gtmOnSuccess').wasCalled();
+
+- name: Do not set Meta cookies (fbp / fbc) if "extendCookies" checkbox is ticked
+  code: |
+    runCode({
+      pixelId: '123',
+      apiAccessToken: 'abc',
+      testEventCode: 'test123',
+      actionSource: 'source123',
+      extendCookies: false
+    });
+
+    //Assert
+    assertApi('setCookie').wasNotCalled();
+    assertApi('gtmOnSuccess').wasCalled();
+
 setup: |-
   // Arrange
   const JSON = require('JSON');
@@ -746,8 +971,8 @@ setup: |-
   });
 
   const apiEndpoint = 'https://graph.facebook.com';
-  const apiVersion = 'v11.0';
-  const partnerAgent = 'gtmss-1.0.0-0.0.4';
+  const apiVersion = 'v12.0';
+  const partnerAgent = 'gtmss-1.0.0-0.0.6';
 
   const routeParams = 'events?access_token=' + testConfigurationData.apiAccessToken;
   const requestEndpoint = [apiEndpoint,
