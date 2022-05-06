@@ -236,6 +236,7 @@ event.user_data.country = eventModel['x-fb-ud-country'] || hashFunction(addressD
 event.user_data.ge = eventModel['x-fb-ud-ge'];
 event.user_data.db = eventModel['x-fb-ud-db'];
 event.user_data.external_id = eventModel['x-fb-ud-external_id'];
+event.user_data.fb_login_id = eventModel['x-fb-ud-fb_login_id'];
 event.user_data.subscription_id = eventModel['x-fb-ud-subscription_id'];
 event.user_data.fbp = eventModel['x-fb-ck-fbp'] || getCookieValues('_fbp', true)[0];
 event.user_data.fbc = getFbcValue();
@@ -290,6 +291,7 @@ sendHttpRequest(
   requestHeaders,
   JSON.stringify(eventRequest)
 );
+
 
 ___SERVER_PERMISSIONS___
 
@@ -500,7 +502,7 @@ ___SERVER_PERMISSIONS___
       "isEditedByUser": true
     },
     "isRequired": true
-  },
+  }
 ]
 
 
@@ -781,8 +783,7 @@ scenarios:
     assertThat(JSON.parse(httpBody).data[0].user_data.st).isEqualTo(hashFunction('ca'));
     assertThat(JSON.parse(httpBody).data[0].user_data.zp).isEqualTo(hashFunction('94025'));
     assertThat(JSON.parse(httpBody).data[0].user_data.country).isEqualTo(hashFunction('usa'));
-
-- name: Set Meta cookies (fbp / fbc) if "extendCookies" checkbox is ticked
+- name: Set Meta cookies (fbp / fbc) if extendCookies checkbox is ticked
   code: |
     runCode({
       pixelId: '123',
@@ -795,8 +796,7 @@ scenarios:
     //Assert
     assertApi('setCookie').wasCalled();
     assertApi('gtmOnSuccess').wasCalled();
-
-- name: Do not set Meta cookies (fbp / fbc) if "extendCookies" checkbox is ticked
+- name: Do not set Meta cookies (fbp / fbc) if extendCookies checkbox is ticked
   code: |
     runCode({
       pixelId: '123',
@@ -848,6 +848,7 @@ setup: |-
       country: 'us',
       zip: '12345',
       external_id: 'user123',
+      fb_login_id: '1234567890987654',
       subscription_id: 'abc123',
       fbp: 'test_browser_id',
       fbc: 'test_click_id',
@@ -886,6 +887,7 @@ setup: |-
     'x-fb-ud-zp': testData.user_data.zip,
     'x-fb-ud-country': testData.user_data.country,
     'x-fb-ud-external_id': testData.user_data.external_id,
+    'x-fb-ud-fb_login_id': testData.user_data.fb_login_id,
     'x-fb-ud-subscription_id': testData.user_data.subscription_id,
     'x-fb-ck-fbp': testData.user_data.fbp,
     'x-fb-ck-fbc': testData.user_data.fbc,
@@ -921,6 +923,7 @@ setup: |-
     'ge': testData.user_data.gender,
     'db': testData.user_data.date_of_brith,
     'external_id': testData.user_data.external_id,
+    'fb_login_id': testData.user_data.fb_login_id,
     'subscription_id': testData.user_data.subscription_id,
     'fbp': testData.user_data.fbp,
     'fbc': testData.user_data.fbc,
