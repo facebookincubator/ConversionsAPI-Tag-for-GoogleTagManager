@@ -1,11 +1,3 @@
-﻿___TERMS_OF_SERVICE___
-
-By creating or modifying this file you agree to Google Tag Manager's Community
-Template Gallery Developer Terms of Service available at
-https://developers.google.com/tag-manager/gallery-tos (or such other URL as
-Google may provide), as modified from time to time.
-
-
 ___INFO___
 
 {
@@ -163,7 +155,6 @@ function getFbcValue() {
   const url = eventModel.page_location;
   const subDomainIndex = url ? computeEffectiveTldPlusOne(url).split('.').length - 1 : 1;
   const parsedUrl = parseUrl(url);
-
   if (parsedUrl && parsedUrl.searchParams.fbclid) {
     fbc = 'fb.' + subDomainIndex + '.' + getTimestampMillis() + '.' + decodeUriComponent(parsedUrl.searchParams.fbclid);
   }
@@ -173,7 +164,6 @@ function getFbcValue() {
 
 function hashFunction(input){
   const type = getType(input);
-
   if(type == 'undefined' || input == 'undefined') {
     return undefined;
   }
@@ -219,18 +209,18 @@ event.user_data.client_user_agent = eventModel.user_agent;
 
 
 // Commmon Event Schema Parameters
-event.user_data.em = eventModel['x-fb-ud-em'] ||
+event.user_data.em = hashFunction(eventModel['x-fb-ud-em']) ||
                         (eventModel.user_data != null ? hashFunction(eventModel.user_data.email_address) : null);
-event.user_data.ph = eventModel['x-fb-ud-ph'] ||
+event.user_data.ph = hashFunction(eventModel['x-fb-ud-ph']) ||
                         (eventModel.user_data != null ? hashFunction(eventModel.user_data.phone_number) : null);
 
 const addressData = (eventModel.user_data != null && eventModel.user_data.address != null) ? eventModel.user_data.address : {};
-event.user_data.fn = eventModel['x-fb-ud-fn'] || hashFunction(addressData.first_name);
-event.user_data.ln = eventModel['x-fb-ud-ln'] || hashFunction(addressData.last_name);
-event.user_data.ct = eventModel['x-fb-ud-ct'] || hashFunction(addressData.city);
-event.user_data.st = eventModel['x-fb-ud-st'] || hashFunction(addressData.region);
-event.user_data.zp = eventModel['x-fb-ud-zp'] || hashFunction(addressData.postal_code);
-event.user_data.country = eventModel['x-fb-ud-country'] || hashFunction(addressData.country);
+event.user_data.fn = hashFunction(eventModel['x-fb-ud-fn']) || hashFunction(addressData.first_name);
+event.user_data.ln = hashFunction(eventModel['x-fb-ud-ln']) || hashFunction(addressData.last_name);
+event.user_data.ct = hashFunction(eventModel['x-fb-ud-ct']) || hashFunction(addressData.city);
+event.user_data.st = hashFunction(eventModel['x-fb-ud-st']) || hashFunction(addressData.region);
+event.user_data.zp = hashFunction(eventModel['x-fb-ud-zp']) || hashFunction(addressData.postal_code);
+event.user_data.country = hashFunction(eventModel['x-fb-ud-country']) || hashFunction(addressData.country);
 
 // Conversions API Specific Parameters
 event.user_data.ge = eventModel['x-fb-ud-ge'];
@@ -290,6 +280,7 @@ sendHttpRequest(
   requestHeaders,
   JSON.stringify(eventRequest)
 );
+
 
 ___SERVER_PERMISSIONS___
 
@@ -500,7 +491,7 @@ ___SERVER_PERMISSIONS___
       "isEditedByUser": true
     },
     "isRequired": true
-  },
+  }
 ]
 
 
@@ -579,7 +570,8 @@ scenarios:
 
     //Assert
     assertThat(JSON.parse(httpBody).data[0].event_name).isEqualTo('Lead');
-- name: On receiving event, hashes the the user_data fields if they are not already hashed
+- name: On receiving event, hashes the the user_data fields if they are not already
+    hashed
   code: |-
     // Un-hashed raw email_address from Common Event Schema is hashed before posted to Conversions API.
 
@@ -672,7 +664,8 @@ scenarios:
     //Assert
     assertThat(JSON.parse(httpBody).data[0].user_data.fbp).isEqualTo('fbp_cookie');
     assertThat(JSON.parse(httpBody).data[0].user_data.fbc).isEqualTo('fbc_cookie');
-- name: On receiving GA4 event, with the items info, tag parses them into Conversions API schema
+- name: On receiving GA4 event, with the items info, tag parses them into Conversions
+    API schema
   code: |-
     // Act
     let items = [
@@ -781,35 +774,6 @@ scenarios:
     assertThat(JSON.parse(httpBody).data[0].user_data.st).isEqualTo(hashFunction('ca'));
     assertThat(JSON.parse(httpBody).data[0].user_data.zp).isEqualTo(hashFunction('94025'));
     assertThat(JSON.parse(httpBody).data[0].user_data.country).isEqualTo(hashFunction('usa'));
-
-- name: Set Meta cookies (fbp / fbc) if "extendCookies" checkbox is ticked
-  code: |
-    runCode({
-      pixelId: '123',
-      apiAccessToken: 'abc',
-      testEventCode: 'test123',
-      actionSource: 'source123',
-      extendCookies: true
-    });
-
-    //Assert
-    assertApi('setCookie').wasCalled();
-    assertApi('gtmOnSuccess').wasCalled();
-
-- name: Do not set Meta cookies (fbp / fbc) if "extendCookies" checkbox is ticked
-  code: |
-    runCode({
-      pixelId: '123',
-      apiAccessToken: 'abc',
-      testEventCode: 'test123',
-      actionSource: 'source123',
-      extendCookies: false
-    });
-
-    //Assert
-    assertApi('setCookie').wasNotCalled();
-    assertApi('gtmOnSuccess').wasCalled();
-
 setup: |-
   // Arrange
   const JSON = require('JSON');
