@@ -219,18 +219,18 @@ event.user_data.client_user_agent = eventModel.user_agent;
 
 
 // Commmon Event Schema Parameters
-event.user_data.em = eventModel['x-fb-ud-em'] ||
+event.user_data.em = hashFunction(eventModel['x-fb-ud-em']) ||
                         (eventModel.user_data != null ? hashFunction(eventModel.user_data.email_address) : null);
-event.user_data.ph = eventModel['x-fb-ud-ph'] ||
+event.user_data.ph = hashFunction(eventModel['x-fb-ud-ph']) ||
                         (eventModel.user_data != null ? hashFunction(eventModel.user_data.phone_number) : null);
 
 const addressData = (eventModel.user_data != null && eventModel.user_data.address != null) ? eventModel.user_data.address : {};
-event.user_data.fn = eventModel['x-fb-ud-fn'] || hashFunction(addressData.first_name);
-event.user_data.ln = eventModel['x-fb-ud-ln'] || hashFunction(addressData.last_name);
-event.user_data.ct = eventModel['x-fb-ud-ct'] || hashFunction(addressData.city);
-event.user_data.st = eventModel['x-fb-ud-st'] || hashFunction(addressData.region);
-event.user_data.zp = eventModel['x-fb-ud-zp'] || hashFunction(addressData.postal_code);
-event.user_data.country = eventModel['x-fb-ud-country'] || hashFunction(addressData.country);
+event.user_data.fn = hashFunction(eventModel['x-fb-ud-fn']) || hashFunction(addressData.first_name);
+event.user_data.ln = hashFunction(eventModel['x-fb-ud-ln']) || hashFunction(addressData.last_name);
+event.user_data.ct = hashFunction(eventModel['x-fb-ud-ct']) || hashFunction(addressData.city);
+event.user_data.st = hashFunction(eventModel['x-fb-ud-st']) || hashFunction(addressData.region);
+event.user_data.zp = hashFunction(eventModel['x-fb-ud-zp']) || hashFunction(addressData.postal_code);
+event.user_data.country = hashFunction(eventModel['x-fb-ud-country']) || hashFunction(addressData.country);
 
 // Conversions API Specific Parameters
 event.user_data.ge = eventModel['x-fb-ud-ge'];
