@@ -2,9 +2,11 @@ homepage: "https://developers.facebook.com/docs/marketing-api/conversions-api"
 documentation: "https://developers.facebook.com/docs/marketing-api/conversions-api/guides/gtm-server-side"
 versions:
   # Latest
+  - sha: 50c2d821140aba6519d8cf4e8f7a8af5ba7a8e0c
+    changeNotes: API version bump for GTM Plugin
+  # Older versions
   - sha: e6da8b1053e39c03fec77c455e6aae839344da43
     changeNotes: Updating Facebook references to Meta
-  # Older versions
   - sha: 1c8df2efbf77f0913863399ada05ae5c6895636d
     changeNotes: Map gtm.dom event_names to PageView
   - sha: 6ea79a611f497daabc37cce5d0ed1447685cc930
