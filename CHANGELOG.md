@@ -2,6 +2,9 @@
 
 ## Released
 
+0.0.7 (Feb 27, 2022)
+* Update Conversions API Graph version to v14.0
+
 0.0.6 (Jan 24, 2022)
 * Upgrading Facebook references to Meta.
 
