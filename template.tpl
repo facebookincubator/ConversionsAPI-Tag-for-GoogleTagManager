@@ -782,7 +782,7 @@ scenarios:
     assertThat(JSON.parse(httpBody).data[0].user_data.zp).isEqualTo(hashFunction('94025'));
     assertThat(JSON.parse(httpBody).data[0].user_data.country).isEqualTo(hashFunction('usa'));
 
-- name: Set Meta cookies (fbp / fbc) if "extendCookies" checkbox is ticked
+- name: Set Meta cookies (fbp / fbc) if 'extendCookies' checkbox is ticked
   code: |
     runCode({
       pixelId: '123',
@@ -796,7 +796,7 @@ scenarios:
     assertApi('setCookie').wasCalled();
     assertApi('gtmOnSuccess').wasCalled();
 
-- name: Do not set Meta cookies (fbp / fbc) if "extendCookies" checkbox is ticked
+- name: Do not set Meta cookies (fbp / fbc) if 'extendCookies' checkbox is ticked
   code: |
     runCode({
       pixelId: '123',
