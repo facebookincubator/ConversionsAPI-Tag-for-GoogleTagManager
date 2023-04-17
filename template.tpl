@@ -188,12 +188,9 @@ function hashFunction(input){
 function getContentFromItems(items) {
     return items.map(item => {
         return {
-            "id": item.item_id,
-            "title": item.item_name,
+            "id": item.item_id  || item.item_name,
             "item_price": item.price,
-            "brand": item.item_brand,
             "quantity": item.quantity,
-            "category": item.item_category,
         };
     });
 }
@@ -704,11 +701,9 @@ scenarios:
     let actual_contents = JSON.parse(httpBody).data[0].custom_data.contents;
     assertThat(JSON.parse(httpBody).data[0].custom_data.contents.length).isEqualTo(items.length);
     for( var i = 0; i < items.length; i++) {
-      assertThat(actual_contents[i].id).isEqualTo(items[i].item_id);
+      assertThat(actual_contents[i].id).isEqualTo(items[i].item_id || items[i].item_name);
       assertThat(actual_contents[i].item_price).isEqualTo(items[i].price);
-      assertThat(actual_contents[i].brand).isEqualTo(items[i].item_brand);
       assertThat(actual_contents[i].quantity).isEqualTo(items[i].quantity);
-      assertThat(actual_contents[i].category).isEqualTo(items[i].item_category);
     }
 
     // Act
