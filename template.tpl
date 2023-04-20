@@ -246,8 +246,9 @@ event.custom_data.content_category = eventModel['x-fb-cd-content_category'];
 event.custom_data.content_ids = eventModel['x-fb-cd-content_ids'];
 event.custom_data.content_name = eventModel['x-fb-cd-content_name'];
 event.custom_data.content_type = eventModel['x-fb-cd-content_type'];
-event.custom_data.contents = eventModel['x-fb-cd-contents'] ||
-                                  (eventModel.items != null ? getContentFromItems(eventModel.items) : null);
+const invalidString = "[object Object]";
+event.custom_data.contents = (eventModel['x-fb-cd-contents'] != null && eventModel['x-fb-cd-contents'].indexOf(invalidString) == 0 ? null : JSON.parse(eventModel['x-fb-cd-contents']))
+ || (eventModel.items != null ? getContentFromItems(eventModel.items) : null);
 event.custom_data.num_items = eventModel['x-fb-cd-num_items'];
 event.custom_data.predicted_ltv = eventModel['x-fb-cd-predicted_ltv'];
 event.custom_data.status = eventModel['x-fb-cd-status'];
