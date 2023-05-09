@@ -249,6 +249,11 @@ event.custom_data.content_type = eventModel['x-fb-cd-content_type'];
 const invalidString = "[object Object]";
 event.custom_data.contents = (eventModel['x-fb-cd-contents'] != null && eventModel['x-fb-cd-contents'].indexOf(invalidString) == 0 ? null : JSON.parse(eventModel['x-fb-cd-contents']))
  || (eventModel.items != null ? getContentFromItems(eventModel.items) : null);
+
+const customProperties = JSON.parse((eventModel.custom_properties != null) ? (eventModel.custom_properties.indexOf(invalidString) == 0 ? null : eventModel.custom_properties) : {});
+for (const property in customProperties) {
+    event.custom_data[property] = customProperties[property];
+}
 event.custom_data.num_items = eventModel['x-fb-cd-num_items'];
 event.custom_data.predicted_ltv = eventModel['x-fb-cd-predicted_ltv'];
 event.custom_data.status = eventModel['x-fb-cd-status'];
