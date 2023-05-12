@@ -236,6 +236,8 @@ event.user_data.external_id = eventModel['x-fb-ud-external_id'];
 event.user_data.subscription_id = eventModel['x-fb-ud-subscription_id'];
 event.user_data.fbp = eventModel['x-fb-ck-fbp'] || getCookieValues('_fbp', true)[0];
 event.user_data.fbc = getFbcValue();
+event.user_data.fb_login_id = eventModel['x-fb-ud-fb-login-id'] || (eventModel.user_data != null ? eventModel.user_data.fb_login_id : null);
+
 
 event.custom_data = {};
 event.custom_data.currency = eventModel.currency;
@@ -759,6 +761,7 @@ scenarios:
       inputEventModel['x-fb-ud-st'] = null;
       inputEventModel['x-fb-ud-zp'] = null;
       inputEventModel['x-fb-ud-country'] = null;
+      inputEventModel['x-fb-ud-fb-login-id'] = null;
       inputEventModel.user_data = {};
       inputEventModel.user_data.email_address = undefined;
       inputEventModel.user_data.phone_number = '1234567890';
@@ -769,6 +772,7 @@ scenarios:
       inputEventModel.user_data.address.region = 'ca';
       inputEventModel.user_data.address.postal_code = '94025';
       inputEventModel.user_data.address.country = 'usa';
+      inputEventModel.user_data.fb_login_id = 123456789;
       return inputEventModel;
     });
 
@@ -782,6 +786,7 @@ scenarios:
     assertThat(JSON.parse(httpBody).data[0].user_data.st).isEqualTo(hashFunction('ca'));
     assertThat(JSON.parse(httpBody).data[0].user_data.zp).isEqualTo(hashFunction('94025'));
     assertThat(JSON.parse(httpBody).data[0].user_data.country).isEqualTo(hashFunction('usa'));
+    assertThat(JSON.parse(httpBody).data[0].user_data.fb_login_id).isEqualTo(123456789);
 
 - name: Set Meta cookies (fbp / fbc) if 'extendCookies' checkbox is ticked
   code: |
@@ -852,6 +857,7 @@ setup: |-
       subscription_id: 'abc123',
       fbp: 'test_browser_id',
       fbc: 'test_click_id',
+      fb_login_id: 123456789,
     },
     custom_data: {
       currency: 'USD',
@@ -888,6 +894,7 @@ setup: |-
     'x-fb-ud-country': testData.user_data.country,
     'x-fb-ud-external_id': testData.user_data.external_id,
     'x-fb-ud-subscription_id': testData.user_data.subscription_id,
+    'x-fb-ud-fb-login-id': testData.user_data.fb_login_id,
     'x-fb-ck-fbp': testData.user_data.fbp,
     'x-fb-ck-fbc': testData.user_data.fbc,
     'currency': testData.custom_data.currency,
@@ -925,6 +932,7 @@ setup: |-
     'subscription_id': testData.user_data.subscription_id,
     'fbp': testData.user_data.fbp,
     'fbc': testData.user_data.fbc,
+    'fb_login_id': testData.user_data.fb_login_id,
   },
     'custom_data': {
       'currency': testData.custom_data.currency,
