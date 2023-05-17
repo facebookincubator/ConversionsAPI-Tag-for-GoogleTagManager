@@ -249,10 +249,9 @@ event.custom_data.content_ids = eventModel['x-fb-cd-content_ids'];
 event.custom_data.content_name = eventModel['x-fb-cd-content_name'];
 event.custom_data.content_type = eventModel['x-fb-cd-content_type'];
 const invalidString = "[object Object]";
-event.custom_data.contents = (eventModel['x-fb-cd-contents'] != null && eventModel['x-fb-cd-contents'].indexOf(invalidString) == 0 ? null : JSON.parse(eventModel['x-fb-cd-contents']))
- || (eventModel.items != null ? getContentFromItems(eventModel.items) : null);
+event.custom_data.contents = (eventModel['x-fb-cd-contents'] != null && eventModel['x-fb-cd-contents'].indexOf(invalidString) == 0 ? null : (typeof(eventModel['x-fb-cd-contents']) == "string" ? JSON.parse(eventModel['x-fb-cd-contents']) : eventModel['x-fb-cd-contents'])) || (eventModel.items != null ? getContentFromItems(eventModel.items) : null);
 
-const customProperties = JSON.parse((eventModel.custom_properties != null) ? (eventModel.custom_properties.indexOf(invalidString) == 0 ? null : eventModel.custom_properties) : {});
+const customProperties = (eventModel.custom_properties != null) ? (eventModel.custom_properties.indexOf(invalidString) == 0 ? null : (typeof(eventModel.custom_properties) == "string" ?JSON.parse(eventModel.custom_properties) : eventModel.custom_properties))  : {};
 for (const property in customProperties) {
     event.custom_data[property] = customProperties[property];
 }
