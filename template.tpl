@@ -956,7 +956,7 @@ setup: |-
 
   const apiEndpoint = 'https://graph.facebook.com';
   const apiVersion = 'v16.0';
-  const partnerAgent = 'gtmss-1.0.0-0.8';
+  const partnerAgent = 'gtmss-1.0.0-0.0.8';
 
   const routeParams = 'events?access_token=' + testConfigurationData.apiAccessToken;
   const requestEndpoint = [apiEndpoint,
