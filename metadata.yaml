@@ -2,6 +2,9 @@ homepage: "https://developers.facebook.com/docs/marketing-api/conversions-api"
 documentation: "https://developers.facebook.com/docs/marketing-api/conversions-api/guides/gtm-server-side"
 versions:
   # Latest
+  - sha: f261eb2d0858b455618569cdfa8c752f2d543568
+    changeNotes: Fix test setup
+  # Older versions
   - sha: 60e6504b1bff94f57a22abd9c7bc7c4043de44d7
     changeNotes: API version bump to v16.0 for GTM Plugin
       1. Fixing syntax error in GTM template for extending meta cookies (fbp/fbc).
@@ -10,7 +13,6 @@ versions:
       4. Enable custom parameters.
       5. Added fb_login_id support.
       6. Added Meta Logo.
-  # Older versions
   - sha: b0c8f9608085738725806125aa849b8b959ed70c
     changeNotes: API version bump for GTM Plugin
   - sha: e6da8b1053e39c03fec77c455e6aae839344da43
