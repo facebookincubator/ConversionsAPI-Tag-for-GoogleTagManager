@@ -2,6 +2,15 @@
 
 ## Released
 
+0.0.8 (May 22, 2023)
+* Update Conversions API Graph version to v16.0
+* Fix syntax error in GTM template for extending meta cookies (fbp/fbc).
+* Fix contents array parsing.
+* Fix contents array received as [object Object].
+* Enable custom parameters.
+* Added fb_login_id support.
+* Added Meta Logo.
+
 0.0.7 (Feb 27, 2022)
 * Update Conversions API Graph version to v14.0
 
