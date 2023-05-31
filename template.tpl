@@ -186,6 +186,13 @@ function hashFunction(input){
   return sha256Sync(input.trim().toLowerCase(), {outputEncoding: 'hex'});
 }
 
+function formatPhoneNumber(input) {
+  if (input && (input.charAt(0) === "+")) {
+    return input.substring(1);
+  }
+  return input;
+}
+
 function getContentFromItems(items) {
     return items.map(item => {
         return {
@@ -219,8 +226,10 @@ event.user_data.client_user_agent = eventModel.user_agent;
 // Commmon Event Schema Parameters
 event.user_data.em = eventModel['x-fb-ud-em'] ||
                         (eventModel.user_data != null ? hashFunction(eventModel.user_data.email_address) : null);
+// strip leading + from phone_number if provided in user_data
 event.user_data.ph = eventModel['x-fb-ud-ph'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.phone_number) : null);
+  (eventModel.user_data != null ? 
+    hashFunction(formatPhoneNumber(eventModel.user_data.phone_number)) : null);
 
 const addressData = (eventModel.user_data != null && eventModel.user_data.address != null) ? eventModel.user_data.address : {};
 event.user_data.fn = eventModel['x-fb-ud-fn'] || hashFunction(addressData.first_name);
@@ -815,6 +824,21 @@ scenarios:
     //Assert
     assertApi('setCookie').wasNotCalled();
     assertApi('gtmOnSuccess').wasCalled();
+
+- name: Format phone number to drop leading + if provided in user_data
+  code: |
+    mock('getAllEventData', () => {
+      inputEventModel['x-fb-ud-em'] = null;
+      inputEventModel['x-fb-ud-ph'] = null;
+      inputEventModel.user_data = {};
+      inputEventModel.user_data.phone_number = '+1234567890';
+      return inputEventModel;
+    });
+
+    runCode(testConfigurationData);
+
+    assertThat(JSON.parse(httpBody).data[0].user_data.em).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].user_data.ph).isEqualTo(hashFunction('1234567890'));
 
 setup: |-
   // Arrange
