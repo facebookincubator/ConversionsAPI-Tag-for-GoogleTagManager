@@ -265,6 +265,10 @@ event.custom_data.predicted_ltv = eventModel['x-fb-cd-predicted_ltv'];
 event.custom_data.status = eventModel['x-fb-cd-status'];
 event.custom_data.delivery_category = eventModel['x-fb-cd-delivery_category'];
 
+event.data_processing_options = eventModel.data_processing_options;
+event.data_processing_options_country = eventModel.data_processing_options_country;
+event.data_processing_options_state = eventModel.data_processing_options_state;
+
 const eventRequest = {data: [event], partner_agent: PARTNER_AGENT};
 
 if(eventModel.test_event_code || data.testEventCode) {
@@ -820,6 +824,21 @@ scenarios:
     assertApi('setCookie').wasNotCalled();
     assertApi('gtmOnSuccess').wasCalled();
 
+- name: On receiving event, sets the data_processing_options field if present
+  code: |
+    mock('getAllEventData', () => {
+      inputEventModel.data_processing_options = testData.data_processing_options;
+      inputEventModel.data_processing_options_country = testData.data_processing_options_country;
+      inputEventModel.data_processing_options_state = testData.data_processing_options_state;
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+
+    //Assert
+    assertThat(JSON.parse(httpBody).data[0].data_processing_options).isEqualTo(inputEventModel.data_processing_options);
+    assertThat(JSON.parse(httpBody).data[0].data_processing_options_country).isEqualTo(inputEventModel.data_processing_options_country);
+    assertThat(JSON.parse(httpBody).data[0].data_processing_options_state).isEqualTo(inputEventModel.data_processing_options_state);
+
 setup: |-
   // Arrange
   const JSON = require('JSON');
@@ -877,7 +896,10 @@ setup: |-
       predicted_ltv: '10000',
       delivery_category: 'home_delivery',
       status: 'subscribed',
-    }
+    },
+    "data_processing_options": ["LDU"],
+    "data_processing_options_country": 1,
+    "data_processing_options_state": 1000,
   };
 
   let inputEventModel = {
@@ -913,6 +935,9 @@ setup: |-
     'x-fb-cd-num_items': testData.custom_data.num_items,
     'x-fb-cd-predicted_ltv': testData.custom_data.predicted_ltv,
     'x-fb-cd-delivery_category': testData.custom_data.delivery_category,
+    'data_processing_options': testData.data_processing_options,
+    'data_processing_options_country': testData.data_processing_options_country,
+    'data_processing_options_state': testData.data_processing_options_state,
   };
 
   const expectedEventData = {
@@ -951,7 +976,10 @@ setup: |-
       'predicted_ltv': testData.custom_data.predicted_ltv,
       'status': testData.custom_data.status,
       'delivery_category': testData.custom_data.delivery_category,
-    }
+    },
+    'data_processing_options': testData.data_processing_options,
+    'data_processing_options_country': testData.data_processing_options_country,
+    'data_processing_options_state': testData.data_processing_options_state,
   };
 
   mock('getAllEventData', () => {
