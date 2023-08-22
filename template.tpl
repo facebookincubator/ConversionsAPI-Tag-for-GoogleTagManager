@@ -106,6 +106,13 @@ ___TEMPLATE_PARAMETERS___
     "name": "extendCookies",
     "checkboxText": "Extend Meta Pixel cookies (fbp/fbc)",
     "simpleValueType": true
+  },
+  {
+    "type": "CHECKBOX",
+    "name": "enableEventEnhancement",
+    "checkboxText": "Enable Event Enhancement",
+    "simpleValueType": true,
+    "help": "Enable Use of HTTP Only Secure Cookie (gtmeec) to Enhance Event Data"
   }
 ]
 
@@ -120,6 +127,8 @@ const JSON = require('JSON');
 const Math = require('Math');
 const getTimestampMillis = require('getTimestampMillis');
 const sha256Sync = require('sha256Sync');
+const toBase64 = require('toBase64');
+const fromBase64 = require('fromBase64');
 const getCookieValues = require('getCookieValues');
 const setCookie = require('setCookie');
 const decodeUriComponent = require('decodeUriComponent');
@@ -129,7 +138,7 @@ const computeEffectiveTldPlusOne = require('computeEffectiveTldPlusOne');
 // Constants
 const API_ENDPOINT = 'https://graph.facebook.com';
 const API_VERSION = 'v16.0';
-const PARTNER_AGENT = 'gtmss-1.0.0-0.0.8';
+const PARTNER_AGENT = 'gtmss-1.0.0-0.0.9';
 const GTM_EVENT_MAPPINGS = {
   "add_payment_info": "AddPaymentInfo",
   "add_to_cart": "AddToCart",
@@ -159,12 +168,22 @@ function setFbCookie(name, value, expire) {
   });
 }
 
+function setHttpOnlyCookie(name, value, expire) {
+  setCookie(name, value, {
+    domain: 'auto',
+    path: '/',
+    samesite: 'strict',
+    secure: true,
+    'max-age': expire || 7776000, // default to 90 days
+    httpOnly: true
+  });
+}
+
 function getFbcValue() {
   let fbc = eventModel['x-fb-ck-fbc'] || getCookieValues('_fbc', true)[0];
   const url = eventModel.page_location;
   const subDomainIndex = url ? computeEffectiveTldPlusOne(url).split('.').length - 1 : 1;
   const parsedUrl = parseUrl(url);
-
   if (parsedUrl && parsedUrl.searchParams.fbclid) {
     fbc = 'fb.' + subDomainIndex + '.' + getTimestampMillis() + '.' + decodeUriComponent(parsedUrl.searchParams.fbclid);
   }
@@ -174,7 +193,6 @@ function getFbcValue() {
 
 function hashFunction(input){
   const type = getType(input);
-
   if(type == 'undefined' || input == 'undefined') {
     return undefined;
   }
@@ -189,9 +207,9 @@ function hashFunction(input){
 function getContentFromItems(items) {
     return items.map(item => {
         return {
-            "id": item.item_id  || item.item_name,
-            "item_price": item.price,
-            "quantity": item.quantity,
+            "id": (item.item_id || item.item_name) || undefined,
+            "item_price": item.price || undefined,
+            "quantity": item.quantity || undefined,
         };
     });
 }
@@ -218,13 +236,14 @@ event.user_data.client_user_agent = eventModel.user_agent;
 
 // Commmon Event Schema Parameters
 event.user_data.em = eventModel['x-fb-ud-em'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.email_address) : null);
+                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.email_address) : undefined);
+
 let normalizedPhoneNumber = null;
 if (eventModel.user_data && eventModel.user_data.phone_number) {
   normalizedPhoneNumber = eventModel.user_data.phone_number.replace("+", "").replace("-", "").replace(" ", "").replace("(", "").replace(")", "");
   normalizedPhoneNumber = hashFunction(normalizedPhoneNumber);
 }
-event.user_data.ph = eventModel['x-fb-ud-ph'] || normalizedPhoneNumber;
+event.user_data.ph = eventModel['x-fb-ud-ph'] || (normalizedPhoneNumber != null ? normalizedPhoneNumber : undefined);
 
 const addressData = (eventModel.user_data != null && eventModel.user_data.address != null) ? eventModel.user_data.address : {};
 event.user_data.fn = eventModel['x-fb-ud-fn'] || hashFunction(addressData.first_name);
@@ -241,8 +260,7 @@ event.user_data.external_id = eventModel['x-fb-ud-external_id'];
 event.user_data.subscription_id = eventModel['x-fb-ud-subscription_id'];
 event.user_data.fbp = eventModel['x-fb-ck-fbp'] || getCookieValues('_fbp', true)[0];
 event.user_data.fbc = getFbcValue();
-event.user_data.fb_login_id = eventModel['x-fb-ud-fb-login-id'] || (eventModel.user_data != null ? eventModel.user_data.fb_login_id : null);
-
+event.user_data.fb_login_id = eventModel['x-fb-ud-fb-login-id'] || (eventModel.user_data != null && eventModel.user_data.fb_login_id != null ? eventModel.user_data.fb_login_id : undefined);
 
 event.custom_data = {};
 event.custom_data.currency = eventModel.currency;
@@ -254,7 +272,7 @@ event.custom_data.content_ids = eventModel['x-fb-cd-content_ids'];
 event.custom_data.content_name = eventModel['x-fb-cd-content_name'];
 event.custom_data.content_type = eventModel['x-fb-cd-content_type'];
 const invalidString = "[object Object]";
-event.custom_data.contents = (eventModel['x-fb-cd-contents'] != null && eventModel['x-fb-cd-contents'].indexOf(invalidString) == 0 ? null : (typeof(eventModel['x-fb-cd-contents']) == "string" ? JSON.parse(eventModel['x-fb-cd-contents']) : eventModel['x-fb-cd-contents'])) || (eventModel.items != null ? getContentFromItems(eventModel.items) : null);
+event.custom_data.contents = (eventModel['x-fb-cd-contents'] != null && eventModel['x-fb-cd-contents'].indexOf(invalidString) == 0 ? null : (typeof(eventModel['x-fb-cd-contents']) == "string" ? JSON.parse(eventModel['x-fb-cd-contents']) : eventModel['x-fb-cd-contents'])) || (eventModel.items != null ? getContentFromItems(eventModel.items) : undefined);
 
 const customProperties = (eventModel.custom_properties != null) ? (eventModel.custom_properties.indexOf(invalidString) == 0 ? null : (typeof(eventModel.custom_properties) == "string" ?JSON.parse(eventModel.custom_properties) : eventModel.custom_properties))  : {};
 for (const property in customProperties) {
@@ -269,40 +287,202 @@ event.data_processing_options = eventModel.data_processing_options;
 event.data_processing_options_country = eventModel.data_processing_options_country;
 event.data_processing_options_state = eventModel.data_processing_options_state;
 
-const eventRequest = {data: [event], partner_agent: PARTNER_AGENT};
+function setGtmEecCookie(value) {
+  const cookieJsonStr = JSON.stringify(value);
 
-if(eventModel.test_event_code || data.testEventCode) {
-  eventRequest.test_event_code = eventModel.test_event_code ? eventModel.test_event_code : data.testEventCode;
+  const gtmeecCookieValueBase64 = toBase64(cookieJsonStr);
+
+  setHttpOnlyCookie('_gtmeec', gtmeecCookieValueBase64);
 }
 
-// Posting to Conversions API
-const routeParams = 'events?access_token=' + data.apiAccessToken;
-const graphEndpoint = [API_ENDPOINT,
-                       API_VERSION,
-                       data.pixelId,
-                       routeParams].join('/');
+//sets first party cookie with latest merged user data.
+function setResponseHeaderCookies(user_data) {
+  let gtmeecCookie = JSON.parse('{}');
 
-const requestHeaders = {headers: {'content-type': 'application/json'}, method: 'POST'};
-sendHttpRequest(
-  graphEndpoint,
-  (statusCode, headers, response) => {
-    if (statusCode >= 200 && statusCode < 300) {
-      if (data.extendCookies && event.user_data.fbc) {
-        setFbCookie('_fbc', event.user_data.fbc);
-      }
+  // if user_data has new information, gtmeec data is overriden
+  if (user_data.em) {
+    gtmeecCookie.em = user_data.em;
+  }
 
-      if (data.extendCookies && event.user_data.fbp) {
-        setFbCookie('_fbp', event.user_data.fbp);
-      }
+  if (user_data.ph) {
+    gtmeecCookie.ph = user_data.ph;
+  }
 
-      data.gtmOnSuccess();
-    } else {
-      data.gtmOnFailure();
+  if (user_data.ln) {
+    gtmeecCookie.ln = user_data.ln;
+  }
+
+  if (user_data.fn) {
+    gtmeecCookie.fn = user_data.fn;
+  }
+
+  if (user_data.ct) {
+    gtmeecCookie.ct = user_data.ct;
+  }
+
+  if (user_data.st) {
+    gtmeecCookie.st = user_data.st;
+  }
+
+  if (user_data.zp) {
+    gtmeecCookie.zp = user_data.zp;
+  }
+
+  if (user_data.ge) {
+    gtmeecCookie.ge = user_data.ge;
+  }
+
+  if (user_data.db) {
+    gtmeecCookie.db = user_data.db;
+  }
+
+  if (user_data.country) {
+    gtmeecCookie.country = user_data.country;
+  }
+
+  if (user_data.external_id){
+    gtmeecCookie.external_id = user_data.external_id;
+  }
+
+  if (user_data.fb_login_id) {
+    gtmeecCookie.fb_login_id = user_data.fb_login_id;
+  }
+
+  setGtmEecCookie(gtmeecCookie);
+}
+
+//enhance event data with first party `_gtmeec` cookie
+function enhanceEventData(user_data) {
+
+  const cookieValues = getCookieValues('_gtmeec', true);
+
+  if (!cookieValues) {
+    return user_data;
+  }
+
+  if (cookieValues.length == 0) {
+    return user_data;
+  }
+
+  const encodedValue = cookieValues[0];
+
+  if (!encodedValue) {
+    return user_data;
+  }
+
+  const jsonStr = fromBase64(encodedValue);
+  if (!jsonStr) {
+    return user_data;
+  }
+
+  const gtmeecData = JSON.parse(jsonStr);
+
+  // if incoming event has already have the customer information then don't change
+  if (gtmeecData) {
+    if (!user_data.em && gtmeecData.em) {
+      user_data.em = gtmeecData.em;
     }
-  },
-  requestHeaders,
-  JSON.stringify(eventRequest)
-);
+
+    if (!user_data.ph && gtmeecData.ph) {
+      user_data.ph = gtmeecData.ph;
+    }
+
+    if (!user_data.ln && gtmeecData.ph) {
+      user_data.ln = gtmeecData.ln;
+    }
+
+    if (!user_data.fn && gtmeecData.fn) {
+      user_data.fn = gtmeecData.fn;
+    }
+
+    if (!user_data.ct && gtmeecData.ct) {
+      user_data.ct = gtmeecData.ct;
+    }
+
+    if (!user_data.st && gtmeecData.st) {
+      user_data.st = gtmeecData.st;
+    }
+
+    if (!user_data.zp && gtmeecData.zp) {
+      user_data.zp = gtmeecData.zp;
+    }
+
+    if (!user_data.ge && gtmeecData.ge) {
+      user_data.ge = gtmeecData.ge;
+    }
+
+    if (!user_data.db && gtmeecData.db) {
+      user_data.db = gtmeecData.db;
+    }
+
+    if (!user_data.country && gtmeecData.country) {
+      user_data.country = gtmeecData.country;
+    }
+
+    if (!user_data.external_id && gtmeecData.external_id) {
+      user_data.external_id = gtmeecData.external_id;
+    }
+
+    if (!user_data.fb_login_id && gtmeecData.fb_login_id) {
+      user_data.fb_login_id = gtmeecData.fb_login_id;
+    }
+  }
+
+  return user_data;
+}
+
+//send events to CAPI Server
+function sendEventToCapiServers(pixel_event) {
+
+  // if event enhancement is enabled then event data is enhanced
+  let partnerAgent = PARTNER_AGENT;
+  if (data.enableEventEnhancement) {
+    pixel_event.user_data = enhanceEventData(pixel_event.user_data);
+    partnerAgent =  PARTNER_AGENT + '-ee';
+  }
+
+  const eventRequest = {data: [pixel_event], partner_agent: partnerAgent};
+
+  if(eventModel.test_event_code || data.testEventCode) {
+    eventRequest.test_event_code = eventModel.test_event_code ? eventModel.test_event_code : data.testEventCode;
+  }
+
+  const routeParams = 'events?access_token=' + data.apiAccessToken;
+  const graphEndpoint = [API_ENDPOINT,
+                         API_VERSION,
+                         data.pixelId,
+                         routeParams].join('/');
+
+  const requestHeaders = {headers: {'content-type': 'application/json'}, method: 'POST'};
+  return sendHttpRequest(
+    graphEndpoint,
+    (statusCode, headers, response) => {
+      if (statusCode >= 200 && statusCode < 300) {
+
+        if (data.extendCookies && pixel_event.user_data.fbc) {
+          setFbCookie('_fbc', pixel_event.user_data.fbc);
+        }
+
+        if (data.extendCookies && pixel_event.user_data.fbp) {
+          setFbCookie('_fbp', pixel_event.user_data.fbp);
+        }
+
+        if (data.enableEventEnhancement) {
+          setResponseHeaderCookies(pixel_event.user_data);
+        }
+
+        data.gtmOnSuccess();
+      } else {
+        data.gtmOnFailure();
+      }
+    },
+    requestHeaders,
+    JSON.stringify(eventRequest)
+  );
+}
+
+sendEventToCapiServers(event);
+
 
 ___SERVER_PERMISSIONS___
 
@@ -387,6 +567,10 @@ ___SERVER_PERMISSIONS___
               {
                 "type": 1,
                 "string": "_fbc"
+              },
+              {
+                "type": 1,
+                "string": "_gtmeec"
               }
             ]
           }
@@ -503,6 +687,53 @@ ___SERVER_PERMISSIONS___
                     "string": "any"
                   }
                 ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "name"
+                  },
+                  {
+                    "type": 1,
+                    "string": "domain"
+                  },
+                  {
+                    "type": 1,
+                    "string": "path"
+                  },
+                  {
+                    "type": 1,
+                    "string": "secure"
+                  },
+                  {
+                    "type": 1,
+                    "string": "session"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "_gtmeec"
+                  },
+                  {
+                    "type": 1,
+                    "string": "*"
+                  },
+                  {
+                    "type": 1,
+                    "string": "*"
+                  },
+                  {
+                    "type": 1,
+                    "string": "secure"
+                  },
+                  {
+                    "type": 1,
+                    "string": "any"
+                  }
+                ]
               }
             ]
           }
@@ -514,6 +745,37 @@ ___SERVER_PERMISSIONS___
     },
     "isRequired": true
   },
+  {
+    "instance": {
+      "key": {
+        "publicId": "return_response",
+        "versionId": "1"
+      },
+      "param": []
+    },
+    "isRequired": true
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "logging",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "environments",
+          "value": {
+            "type": 1,
+            "string": "debug"
+          }
+        }
+      ]
+    },
+    "clientAnnotations": {
+      "isEditedByUser": true
+    },
+    "isRequired": true
+  }
 ]
 
 
@@ -592,12 +854,14 @@ scenarios:
 
     //Assert
     assertThat(JSON.parse(httpBody).data[0].event_name).isEqualTo('Lead');
-- name: On receiving event, hashes the the user_data fields if they are not already hashed
+- name: On receiving event, hashes the the user_data fields if they are not already
+    hashed
   code: |-
     // Un-hashed raw email_address from Common Event Schema is hashed before posted to Conversions API.
 
     // Act
     mock('getAllEventData', () => {
+      inputEventModel = {};
       inputEventModel['x-fb-ud-em'] = null;
       inputEventModel['x-fb-ud-ph'] = null;
       inputEventModel['x-fb-ud-fn'] = null;
@@ -659,13 +923,15 @@ scenarios:
 
     // Act
     mock('getAllEventData', () => {
+      inputEventModel = {};
+      inputEventModel.user_data = {};
       inputEventModel.user_data.email_address = null;
       return inputEventModel;
     });
     runCode(testConfigurationData);
 
     //Assert
-    assertThat(JSON.parse(httpBody).data[0].user_data.em).isEqualTo(null);
+    assertThat(JSON.parse(httpBody).data[0].user_data.em).isNull();
 - name: On receiving event with fbp/fbc cookies, it is sent to Conversions API
   code: |-
     // Act
@@ -685,7 +951,8 @@ scenarios:
     //Assert
     assertThat(JSON.parse(httpBody).data[0].user_data.fbp).isEqualTo('fbp_cookie');
     assertThat(JSON.parse(httpBody).data[0].user_data.fbc).isEqualTo('fbc_cookie');
-- name: On receiving GA4 event, with the items info, tag parses them into Conversions API schema
+- name: On receiving GA4 event, with the items info, tag parses them into Conversions
+    API schema
   code: |-
     // Act
     let items = [
@@ -698,15 +965,17 @@ scenarios:
           item_brand: 'brand_1',
         },
         {
-        item_id: '2',
-        item_name: 'item_2',
-        quantity: 10,
-        price: 123.45,
-        item_category: 'cat_2',
-        item_brand: 'brand_2',
+          item_id: '2',
+          item_name: 'item_2',
+          quantity: 10,
+          price: 123.45,
+          item_category: 'cat_2',
+          item_brand: 'brand_2',
         }
       ];
+
     mock('getAllEventData', () => {
+      inputEventModel = {};
       inputEventModel['x-fb-cd-contents'] = null;
       inputEventModel.items = items;
       return inputEventModel;
@@ -717,20 +986,23 @@ scenarios:
     let actual_contents = JSON.parse(httpBody).data[0].custom_data.contents;
     assertThat(JSON.parse(httpBody).data[0].custom_data.contents.length).isEqualTo(items.length);
     for( var i = 0; i < items.length; i++) {
-      assertThat(actual_contents[i].id).isEqualTo(items[i].item_id || items[i].item_name);
+      assertThat(actual_contents[i].id).isEqualTo(items[i].item_id);
       assertThat(actual_contents[i].item_price).isEqualTo(items[i].price);
+      assertThat(actual_contents[i].brand).isEqualTo(items[i].item_brand);
       assertThat(actual_contents[i].quantity).isEqualTo(items[i].quantity);
+      assertThat(actual_contents[i].category).isEqualTo(items[i].item_category);
     }
 
     // Act
     mock('getAllEventData', () => {
+      inputEventModel = {};
       inputEventModel.items = null;
       return inputEventModel;
     });
     runCode(testConfigurationData);
 
     //Assert
-    assertThat(JSON.parse(httpBody).data[0].custom_data.contents).isEqualTo(null);
+    assertThat(JSON.parse(httpBody).data[0].custom_data.contents).isUndefined();
 - name: When address is missing it skips parsing the nested fields
   code: |
     mock('getAllEventData', () => {
@@ -761,6 +1033,7 @@ scenarios:
 - name: When parameters are undefined skip parsing
   code: |
     mock('getAllEventData', () => {
+      inputEventModel = {};
       inputEventModel['x-fb-ud-em'] = null;
       inputEventModel['x-fb-ud-ph'] = null;
       inputEventModel['x-fb-ud-fn'] = null;
@@ -809,7 +1082,6 @@ scenarios:
     //Assert
     assertApi('setCookie').wasCalled();
     assertApi('gtmOnSuccess').wasCalled();
-
 - name: Do not set Meta cookies (fbp / fbc) if 'extendCookies' checkbox is ticked
   code: |
     runCode({
@@ -839,6 +1111,100 @@ scenarios:
     assertThat(JSON.parse(httpBody).data[0].data_processing_options_country).isEqualTo(inputEventModel.data_processing_options_country);
     assertThat(JSON.parse(httpBody).data[0].data_processing_options_state).isEqualTo(inputEventModel.data_processing_options_state);
 
+- name: Set Event Enhancement Cookie (gtmeec) if `enableEventEnhancement` is ticked
+  code: |-
+    mock('getAllEventData', () => {
+      inputEventModel = {};
+      inputEventModel.event_name = 'purchase';
+      inputEventModel.user_data = {};
+      inputEventModel.user_data.email_address = 'foo@bar.com';
+      inputEventModel.user_data.phone_number = '1234567890';
+      return inputEventModel;
+    });
+
+    runCode(testConfigurationData);
+
+    runCode({
+      pixelId: '123',
+      apiAccessToken: 'abc',
+      testEventCode: 'test123',
+      actionSource: 'source123',
+      enableEventEnhancement: true,
+      extendCookies: false
+    });
+
+    let cookieOptions = {
+        domain: 'auto',
+        path: '/',
+        samesite: 'strict',
+        secure: true,
+        'max-age': 7776000, // default to 90 days
+        httpOnly: true
+    };
+
+    //Assert
+    assertApi('getCookieValues').wasCalledWith('_gtmeec', true);
+    assertApi('setCookie').wasCalledWith('_gtmeec', 'eyJlbSI6IjBjN2U2YTQwNTg2MmU0MDJlYjc2YTcwZjhhMjZmYzczMmQwN2MzMjkzMWU5ZmFlOWFiMTU4MjkxMWQyZThhM2IiLCJwaCI6ImM3NzVlN2I3NTdlZGU2MzBjZDBhYTExMTNiZDEwMjY2MWFiMzg4MjljYTUyYTY0MjJhYjc4Mjg2MmYyNjg2NDYifQ==', cookieOptions);
+    assertApi('gtmOnSuccess').wasCalled();
+- name: Do not set Event Enhancement Cookie (gtmeec) if `enableEventEnhancement` is
+    not ticked
+  code: |-
+    runCode({
+      pixelId: '123',
+      apiAccessToken: 'abc',
+      testEventCode: 'test123',
+      actionSource: 'source123',
+      extendCookies: false,
+      enableEventEnhancement: false
+    });
+
+    //Assert
+    assertApi('getCookieValues').wasNotCalledWith('_gtmeec', true);
+    assertApi('setCookie').wasNotCalled();
+    assertApi('gtmOnSuccess').wasCalled();
+- name: Parse gtmeec Cookie and Enrich Event When `enableEventEnhancement` is ticked
+  code: |
+    mock('getAllEventData', () => {
+      inputEventModel = {};
+      inputEventModel.event_name = 'purchase';
+      inputEventModel.user_data = {};
+      return inputEventModel;
+    });
+
+    runCode(testConfigurationData);
+
+    const cookieName = '_gtmeec';
+    const val = true;
+
+    mock('getCookieValues', (cookieName, val) => {
+      return ['eyJlbSI6ImVlMjc4OTQzZGU4NGU1ZDYyNDM1NzhlZTFhMTA1N2JjY2UwZTUwZGFhZDk3NTVmNDVkZmE2NGI2MGIxM2JjNWQiLCJwaCI6ImM3NzVlN2I3NTdlZGU2MzBjZDBhYTExMTNiZDEwMjY2MWFiMzg4MjljYTUyYTY0MjJhYjc4Mjg2MmYyNjg2NDYifQ=='];
+    });
+
+    runCode({
+      pixelId: '123',
+      apiAccessToken: 'abc',
+      testEventCode: 'test123',
+      actionSource: 'source123',
+      enableEventEnhancement: true,
+      extendCookies: false
+    });
+
+    let cookieOptions = {
+        domain: 'auto',
+        path: '/',
+        samesite: 'strict',
+        secure: true,
+        'max-age': 7776000, // default to 90 days
+        httpOnly: true
+    };
+
+    // Assert
+    assertApi('getCookieValues').wasCalledWith('_gtmeec', true);
+    assertApi('setCookie').wasCalledWith('_gtmeec', 'eyJlbSI6ImVlMjc4OTQzZGU4NGU1ZDYyNDM1NzhlZTFhMTA1N2JjY2UwZTUwZGFhZDk3NTVmNDVkZmE2NGI2MGIxM2JjNWQiLCJwaCI6ImM3NzVlN2I3NTdlZGU2MzBjZDBhYTExMTNiZDEwMjY2MWFiMzg4MjljYTUyYTY0MjJhYjc4Mjg2MmYyNjg2NDYifQ==', cookieOptions);
+    assertApi('gtmOnSuccess').wasCalled();
+
+    assertThat(JSON.parse(httpBody).data[0].user_data.em).isEqualTo('ee278943de84e5d6243578ee1a1057bcce0e50daad9755f45dfa64b60b13bc5d');
+    assertThat(JSON.parse(httpBody).data[0].user_data.ph).isEqualTo('c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646');
 setup: |-
   // Arrange
   const JSON = require('JSON');
@@ -988,7 +1354,7 @@ setup: |-
 
   const apiEndpoint = 'https://graph.facebook.com';
   const apiVersion = 'v16.0';
-  const partnerAgent = 'gtmss-1.0.0-0.0.8';
+  const partnerAgent = 'gtmss-1.0.0-0.0.9';
 
   const routeParams = 'events?access_token=' + testConfigurationData.apiAccessToken;
   const requestEndpoint = [apiEndpoint,
@@ -1001,6 +1367,7 @@ setup: |-
                       partner_agent: partnerAgent,
                       test_event_code: testData.test_event_code
                      };
+
   const requestHeaderOptions = {headers: {'content-type': 'application/json'}, method: 'POST'};
 
   let actualSuccessCallback, httpBody;
@@ -1013,4 +1380,4 @@ setup: |-
 
 ___NOTES___
 
-Created on 8/5/2020, 10:20:28 AM
+Created on 23/03/2023, 12:58:13
