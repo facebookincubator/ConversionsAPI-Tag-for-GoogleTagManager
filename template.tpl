@@ -134,6 +134,7 @@ const setCookie = require('setCookie');
 const decodeUriComponent = require('decodeUriComponent');
 const parseUrl = require('parseUrl');
 const computeEffectiveTldPlusOne = require('computeEffectiveTldPlusOne');
+const generateRandom = require('generateRandom');
 
 // Constants
 const API_ENDPOINT = 'https://graph.facebook.com';
@@ -189,6 +190,16 @@ function getFbcValue() {
   }
 
   return fbc;
+}
+
+function getFbpValue() {
+  const url = eventModel.page_location;
+  const subDomainIndex = url ? computeEffectiveTldPlusOne(url).split('.').length - 1 : 1;
+ 
+  let fbp = 'fb.' + subDomainIndex + '.' + getTimestampMillis() + '.' + generateRandom(100000000, 3500000000);
+  
+
+  return fbp;
 }
 
 function hashFunction(input){
@@ -258,7 +269,7 @@ event.user_data.ge = eventModel['x-fb-ud-ge'];
 event.user_data.db = eventModel['x-fb-ud-db'];
 event.user_data.external_id = eventModel['x-fb-ud-external_id'];
 event.user_data.subscription_id = eventModel['x-fb-ud-subscription_id'];
-event.user_data.fbp = eventModel['x-fb-ck-fbp'] || getCookieValues('_fbp', true)[0];
+event.user_data.fbp = eventModel['x-fb-ck-fbp'] || getCookieValues('_fbp', true)[0] || getFbpValue();
 event.user_data.fbc = getFbcValue();
 event.user_data.fb_login_id = eventModel['x-fb-ud-fb-login-id'] || (eventModel.user_data != null && eventModel.user_data.fb_login_id != null ? eventModel.user_data.fb_login_id : undefined);
 
