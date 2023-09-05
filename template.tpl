@@ -744,37 +744,6 @@ ___SERVER_PERMISSIONS___
       "isEditedByUser": true
     },
     "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
-        "publicId": "return_response",
-        "versionId": "1"
-      },
-      "param": []
-    },
-    "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
-        "publicId": "logging",
-        "versionId": "1"
-      },
-      "param": [
-        {
-          "key": "environments",
-          "value": {
-            "type": 1,
-            "string": "debug"
-          }
-        }
-      ]
-    },
-    "clientAnnotations": {
-      "isEditedByUser": true
-    },
-    "isRequired": true
   }
 ]
 
@@ -958,19 +927,13 @@ scenarios:
     let items = [
         {
           item_id: '1',
-          item_name: 'item_1',
           quantity: 5,
           price: 123.45,
-          item_category: 'cat_1',
-          item_brand: 'brand_1',
         },
         {
           item_id: '2',
-          item_name: 'item_2',
           quantity: 10,
           price: 123.45,
-          item_category: 'cat_2',
-          item_brand: 'brand_2',
         }
       ];
 
@@ -988,9 +951,7 @@ scenarios:
     for( var i = 0; i < items.length; i++) {
       assertThat(actual_contents[i].id).isEqualTo(items[i].item_id);
       assertThat(actual_contents[i].item_price).isEqualTo(items[i].price);
-      assertThat(actual_contents[i].brand).isEqualTo(items[i].item_brand);
       assertThat(actual_contents[i].quantity).isEqualTo(items[i].quantity);
-      assertThat(actual_contents[i].category).isEqualTo(items[i].item_category);
     }
 
     // Act
@@ -1068,7 +1029,6 @@ scenarios:
     assertThat(JSON.parse(httpBody).data[0].user_data.zp).isEqualTo(hashFunction('94025'));
     assertThat(JSON.parse(httpBody).data[0].user_data.country).isEqualTo(hashFunction('usa'));
     assertThat(JSON.parse(httpBody).data[0].user_data.fb_login_id).isEqualTo(123456789);
-
 - name: Set Meta cookies (fbp / fbc) if 'extendCookies' checkbox is ticked
   code: |
     runCode({
@@ -1095,7 +1055,6 @@ scenarios:
     //Assert
     assertApi('setCookie').wasNotCalled();
     assertApi('gtmOnSuccess').wasCalled();
-
 - name: On receiving event, sets the data_processing_options field if present
   code: |
     mock('getAllEventData', () => {
@@ -1110,7 +1069,6 @@ scenarios:
     assertThat(JSON.parse(httpBody).data[0].data_processing_options).isEqualTo(inputEventModel.data_processing_options);
     assertThat(JSON.parse(httpBody).data[0].data_processing_options_country).isEqualTo(inputEventModel.data_processing_options_country);
     assertThat(JSON.parse(httpBody).data[0].data_processing_options_state).isEqualTo(inputEventModel.data_processing_options_state);
-
 - name: Set Event Enhancement Cookie (gtmeec) if `enableEventEnhancement` is ticked
   code: |-
     mock('getAllEventData', () => {
