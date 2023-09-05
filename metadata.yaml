@@ -2,9 +2,11 @@ homepage: "https://developers.facebook.com/docs/marketing-api/conversions-api"
 documentation: "https://developers.facebook.com/docs/marketing-api/conversions-api/guides/gtm-server-side"
 versions:
   # Latest version
+  - sha: 54def96730fc5f25bcf469c0bfe14b90e302c855
+    changeNotes: Invalid template correction to fetch new features, updates and test fixes. See CHANGELOG.md
+  # Older versions
   - sha: 57ed834ad33607799a72eefc6dfdf5c25b395f7a
     changeNotes: Version update with new features and bug fixes. See CHANGELOG.md
-  # Older versions
   - sha: f261eb2d0858b455618569cdfa8c752f2d543568
     changeNotes: Fix test setup
   - sha: 60e6504b1bff94f57a22abd9c7bc7c4043de44d7
