@@ -141,7 +141,6 @@ const decodeUriComponent = require('decodeUriComponent');
 const parseUrl = require('parseUrl');
 const computeEffectiveTldPlusOne = require('computeEffectiveTldPlusOne');
 const getRequestHeader = require('getRequestHeader');
-const logToConsole = require('logToConsole');
 
 // Constants
 const API_ENDPOINT = 'https://graph.facebook.com';
@@ -855,24 +854,6 @@ ___SERVER_PERMISSIONS___
     },
     "clientAnnotations": {
       "isEditedByUser": true
-    },
-    "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
-        "publicId": "logging",
-        "versionId": "1"
-      },
-      "param": [
-        {
-          "key": "environments",
-          "value": {
-            "type": 1,
-            "string": "debug"
-          }
-        }
-      ]
     },
     "isRequired": true
   }
