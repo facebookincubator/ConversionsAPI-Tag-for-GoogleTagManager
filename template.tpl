@@ -15,8 +15,8 @@ ___INFO___
   "securityGroups": [],
   "displayName": "Conversions API Tag",
   "brand": {
-    "id": "brand_dummy",
-    "displayName": "",
+    "id": "github.com_facebookincubator",
+    "displayName": "facebookincubator",
     "thumbnail": "data:image/jpeg;base64,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\u003d"
   },
   "description": "A server-side tag template that prepares information from your tagging server to be sent through Conversions API.",
@@ -113,6 +113,12 @@ ___TEMPLATE_PARAMETERS___
     "checkboxText": "Enable Event Enhancement",
     "simpleValueType": true,
     "help": "Enable Use of HTTP Only Secure Cookie (gtmeec) to Enhance Event Data"
+  },
+  {
+    "type": "CHECKBOX",
+    "name": "OverrideWithAppEngineGeoDataFromHeaders",
+    "checkboxText": "Override geolocation information directly from AppEngine headers",
+    "simpleValueType": true
   }
 ]
 
@@ -134,6 +140,8 @@ const setCookie = require('setCookie');
 const decodeUriComponent = require('decodeUriComponent');
 const parseUrl = require('parseUrl');
 const computeEffectiveTldPlusOne = require('computeEffectiveTldPlusOne');
+const getRequestHeader = require('getRequestHeader');
+const logToConsole = require('logToConsole');
 
 // Constants
 const API_ENDPOINT = 'https://graph.facebook.com';
@@ -248,11 +256,21 @@ event.user_data.ph = eventModel['x-fb-ud-ph'] || (normalizedPhoneNumber != null 
 const addressData = (eventModel.user_data != null && eventModel.user_data.address != null) ? eventModel.user_data.address : {};
 event.user_data.fn = eventModel['x-fb-ud-fn'] || hashFunction(addressData.first_name);
 event.user_data.ln = eventModel['x-fb-ud-ln'] || hashFunction(addressData.last_name);
+
+if(data.OverrideWithAppEngineGeoDataFromHeaders) {
+  addressData.country = getRequestHeader('X-Appengine-Country');
+  addressData.region = getRequestHeader('X-Appengine-Region');
+  addressData.city = getRequestHeader('X-Appengine-City');
+}
+
+
 event.user_data.ct = eventModel['x-fb-ud-ct'] || hashFunction(addressData.city);
 event.user_data.st = eventModel['x-fb-ud-st'] || hashFunction(addressData.region);
-event.user_data.zp = eventModel['x-fb-ud-zp'] || hashFunction(addressData.postal_code);
 event.user_data.country = eventModel['x-fb-ud-country'] || hashFunction(addressData.country);
 
+
+
+event.user_data.zp = eventModel['x-fb-ud-zp'] || hashFunction(addressData.postal_code);
 // Conversions API Specific Parameters
 event.user_data.ge = eventModel['x-fb-ud-ge'];
 event.user_data.db = eventModel['x-fb-ud-db'];
@@ -744,6 +762,119 @@ ___SERVER_PERMISSIONS___
       "isEditedByUser": true
     },
     "isRequired": true
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "read_request",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "headerWhitelist",
+          "value": {
+            "type": 2,
+            "listItem": [
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "headerName"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "x-appengine-city"
+                  }
+                ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "headerName"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "x-appengine-region"
+                  }
+                ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "headerName"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
+                    "string": "x-appengine-country"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "key": "headersAllowed",
+          "value": {
+            "type": 8,
+            "boolean": true
+          }
+        },
+        {
+          "key": "requestAccess",
+          "value": {
+            "type": 1,
+            "string": "specific"
+          }
+        },
+        {
+          "key": "headerAccess",
+          "value": {
+            "type": 1,
+            "string": "specific"
+          }
+        },
+        {
+          "key": "queryParameterAccess",
+          "value": {
+            "type": 1,
+            "string": "any"
+          }
+        }
+      ]
+    },
+    "clientAnnotations": {
+      "isEditedByUser": true
+    },
+    "isRequired": true
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "logging",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "environments",
+          "value": {
+            "type": 1,
+            "string": "debug"
+          }
+        }
+      ]
+    },
+    "isRequired": true
   }
 ]
 
@@ -1163,6 +1294,50 @@ scenarios:
 
     assertThat(JSON.parse(httpBody).data[0].user_data.em).isEqualTo('ee278943de84e5d6243578ee1a1057bcce0e50daad9755f45dfa64b60b13bc5d');
     assertThat(JSON.parse(httpBody).data[0].user_data.ph).isEqualTo('c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646');
+- name: Untitled test 16
+  code: |-
+    const mockData = {
+      // Mocked field values
+    };
+
+    // Call runCode to run the template's code.
+    runCode(mockData);
+
+    // Verify that the tag finished successfully.
+    assertApi('gtmOnSuccess').wasCalled();
+- name: Untitled test 17
+  code: |-
+    const mockData = {
+      // Mocked field values
+    };
+
+    // Call runCode to run the template's code.
+    runCode(mockData);
+
+    // Verify that the tag finished successfully.
+    assertApi('gtmOnSuccess').wasCalled();
+- name: Untitled test 18
+  code: |-
+    const mockData = {
+      // Mocked field values
+    };
+
+    // Call runCode to run the template's code.
+    runCode(mockData);
+
+    // Verify that the tag finished successfully.
+    assertApi('gtmOnSuccess').wasCalled();
+- name: Untitled test 19
+  code: |-
+    const mockData = {
+      // Mocked field values
+    };
+
+    // Call runCode to run the template's code.
+    runCode(mockData);
+
+    // Verify that the tag finished successfully.
+    assertApi('gtmOnSuccess').wasCalled();
 setup: |-
   // Arrange
   const JSON = require('JSON');
@@ -1339,3 +1514,5 @@ setup: |-
 ___NOTES___
 
 Created on 8/5/2020, 10:20:28 AM
+
+
