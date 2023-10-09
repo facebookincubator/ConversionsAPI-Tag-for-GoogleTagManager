@@ -116,8 +116,8 @@ ___TEMPLATE_PARAMETERS___
   },
   {
     "type": "CHECKBOX",
-    "name": "OverrideWithAppEngineGeoDataFromHeaders",
-    "checkboxText": "Override geolocation information directly from AppEngine headers",
+    "name": "UpdateWithAppEngineGeoDataFromHeaders",
+    "checkboxText": "Update geolocation information directly from AppEngine headers",
     "simpleValueType": true
   }
 ]
@@ -256,7 +256,7 @@ const addressData = (eventModel.user_data != null && eventModel.user_data.addres
 event.user_data.fn = eventModel['x-fb-ud-fn'] || hashFunction(addressData.first_name);
 event.user_data.ln = eventModel['x-fb-ud-ln'] || hashFunction(addressData.last_name);
 
-if(data.OverrideWithAppEngineGeoDataFromHeaders) {
+if(data.UpdateWithAppEngineGeoDataFromHeaders) {
   addressData.country = getRequestHeader('X-Appengine-Country');
   addressData.region = getRequestHeader('X-Appengine-Region');
   addressData.city = getRequestHeader('X-Appengine-City');
