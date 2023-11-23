@@ -387,7 +387,7 @@ function enhanceEventData(user_data) {
       user_data.ph = gtmeecData.ph;
     }
 
-    if (!user_data.ln && gtmeecData.ph) {
+    if (!user_data.ln && gtmeecData.ln) {
       user_data.ln = gtmeecData.ln;
     }
 
