@@ -2,14 +2,15 @@
 
 ## Released
 
-0.0.9 (Aug 23, 2023)
+0.0.9 (Sept 5, 2023)
 * Add secure, HTTP only, 1st party `_gtmeec` cookie to enhance event data. This new cookie can be enabled using 'Enable Event Enhancement' option from the tag.
 
 Toggling this feature “on” will help maximize the performance benefits of the events you currently share with Meta. Using this feature may improve your server events’ Event Match Quality (EMQ) by enabling first party http only secure cookie `_gtmeec` to cache hashed PII that you share using the Meta Pixel through Advanced Matching.
 
 * Add [Data Processing Options](https://developers.facebook.com/docs/marketing-apis/data-processing-options/)
 * Fix null value set parameters.
-* Correct phone normalisation was also fixed in these changes
+* Correct phone normalisation was also fixed in these changes.
+* Invalid template correction and test fixes.
 
 0.0.8 (May 22, 2023)
 * Update Conversions API Graph version to v16.0
