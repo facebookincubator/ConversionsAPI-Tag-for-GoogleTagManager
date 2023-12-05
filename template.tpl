@@ -236,7 +236,7 @@ event.user_data.client_user_agent = eventModel.user_agent;
 
 // Commmon Event Schema Parameters
 event.user_data.em = eventModel['x-fb-ud-em'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.email_address) : undefined);
+                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.email) : undefined);
 
 let normalizedPhoneNumber = null;
 if (eventModel.user_data && eventModel.user_data.phone_number) {
@@ -826,7 +826,7 @@ scenarios:
 - name: On receiving event, hashes the the user_data fields if they are not already
     hashed
   code: |-
-    // Un-hashed raw email_address from Common Event Schema is hashed before posted to Conversions API.
+    // Un-hashed raw email from Common Event Schema is hashed before posted to Conversions API.
 
     // Act
     mock('getAllEventData', () => {
@@ -840,7 +840,7 @@ scenarios:
       inputEventModel['x-fb-ud-zp'] = null;
       inputEventModel['x-fb-ud-country'] = null;
       inputEventModel.user_data = {};
-      inputEventModel.user_data.email_address = 'foo@bar.com';
+      inputEventModel.user_data.email = 'foo@bar.com';
       inputEventModel.user_data.phone_number = '1234567890';
       inputEventModel.user_data.address = {};
       inputEventModel.user_data.address.first_name = 'Foo';
@@ -863,11 +863,11 @@ scenarios:
     assertThat(JSON.parse(httpBody).data[0].user_data.zp).isEqualTo(hashFunction('12345'));
     assertThat(JSON.parse(httpBody).data[0].user_data.country).isEqualTo(hashFunction('usa'));
 
-    // Un-hashed raw email_address in mixed-case is converted to lowercase, hashed and posted to Conversions API.
+    // Un-hashed raw email in mixed-case is converted to lowercase, hashed and posted to Conversions API.
 
     // Act
     mock('getAllEventData', () => {
-      inputEventModel.user_data.email_address = 'FOO@BAR.com';
+      inputEventModel.user_data.email = 'FOO@BAR.com';
       return inputEventModel;
     });
     runCode(testConfigurationData);
@@ -876,11 +876,11 @@ scenarios:
     assertThat(JSON.parse(httpBody).data[0].user_data.em).isEqualTo(hashFunction('foo@bar.com'));
 
 
-    // Already sha256(email_address) field from GA4 schema, is unchanged, is posted as-is to Conversions API.
+    // Already sha256(email) field from GA4 schema, is unchanged, is posted as-is to Conversions API.
 
     // Act
     mock('getAllEventData', () => {
-      inputEventModel.user_data.email_address = hashFunction('foo@bar.com');
+      inputEventModel.user_data.email = hashFunction('foo@bar.com');
       return inputEventModel;
     });
     runCode(testConfigurationData);
@@ -894,7 +894,7 @@ scenarios:
     mock('getAllEventData', () => {
       inputEventModel = {};
       inputEventModel.user_data = {};
-      inputEventModel.user_data.email_address = null;
+      inputEventModel.user_data.email = null;
       return inputEventModel;
     });
     runCode(testConfigurationData);
@@ -976,7 +976,7 @@ scenarios:
       inputEventModel['x-fb-ud-zp'] = null;
       inputEventModel['x-fb-ud-country'] = null;
       inputEventModel.user_data = {};
-      inputEventModel.user_data.email_address = 'foo@bar.com';
+      inputEventModel.user_data.email = 'foo@bar.com';
       inputEventModel.user_data.phone_number = '1234567890';
       return inputEventModel;
     });
@@ -1005,7 +1005,7 @@ scenarios:
       inputEventModel['x-fb-ud-country'] = null;
       inputEventModel['x-fb-ud-fb-login-id'] = null;
       inputEventModel.user_data = {};
-      inputEventModel.user_data.email_address = undefined;
+      inputEventModel.user_data.email = undefined;
       inputEventModel.user_data.phone_number = '1234567890';
       inputEventModel.user_data.address = {};
       inputEventModel.user_data.address.first_name = 'John';
@@ -1075,7 +1075,7 @@ scenarios:
       inputEventModel = {};
       inputEventModel.event_name = 'purchase';
       inputEventModel.user_data = {};
-      inputEventModel.user_data.email_address = 'foo@bar.com';
+      inputEventModel.user_data.email = 'foo@bar.com';
       inputEventModel.user_data.phone_number = '1234567890';
       return inputEventModel;
     });
