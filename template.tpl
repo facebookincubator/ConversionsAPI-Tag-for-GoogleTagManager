@@ -236,7 +236,8 @@ event.user_data.client_user_agent = eventModel.user_agent;
 
 // Commmon Event Schema Parameters
 event.user_data.em = eventModel['x-fb-ud-em'] ||
-                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.email_address) : undefined);
+                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.email_address) : undefined) ||
+                        (eventModel.user_data != null ? hashFunction(eventModel.user_data.email) : undefined);
 
 let normalizedPhoneNumber = null;
 if (eventModel.user_data && eventModel.user_data.phone_number) {
