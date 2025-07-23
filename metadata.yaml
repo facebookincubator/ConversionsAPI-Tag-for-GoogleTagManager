@@ -1,0 +1,36 @@
+homepage: "https://developers.facebook.com/docs/marketing-api/conversions-api"
+documentation: "https://developers.facebook.com/docs/marketing-api/conversions-api/guides/gtm-server-side"
+versions:
+  # Latest version
+  - sha: a495e1bb54b3b1fe6e7a9f10fc64aa12e8731428
+    changeNotes: Minor bug fix.
+  # Older versions
+  - sha: 54def96730fc5f25bcf469c0bfe14b90e302c855
+    changeNotes: Invalid template correction to fetch new features, updates and test fixes. See CHANGELOG.md
+  - sha: 57ed834ad33607799a72eefc6dfdf5c25b395f7a
+    changeNotes: Version update with new features and bug fixes. See CHANGELOG.md
+  - sha: f261eb2d0858b455618569cdfa8c752f2d543568
+    changeNotes: Fix test setup
+  - sha: 60e6504b1bff94f57a22abd9c7bc7c4043de44d7
+    changeNotes: API version bump to v16.0 for GTM Plugin
+      1. Fixing syntax error in GTM template for extending meta cookies (fbp/fbc).
+      2. Fix contents array parsing.
+      3. Fix contents array received as [object Object].
+      4. Enable custom parameters.
+      5. Added fb_login_id support.
+      6. Added Meta Logo.
+  - sha: b0c8f9608085738725806125aa849b8b959ed70c
+    changeNotes: API version bump for GTM Plugin
+  - sha: e6da8b1053e39c03fec77c455e6aae839344da43
+    changeNotes: Updating Facebook references to Meta
+  - sha: 1c8df2efbf77f0913863399ada05ae5c6895636d
+    changeNotes: Map gtm.dom event_names to PageView
+  - sha: 6ea79a611f497daabc37cce5d0ed1447685cc930
+    changeNotes: Updated to latest Graph API v11.0
+  - sha: f344a4c9e09aa135ecdb5aa7c945e698efce12c4
+    changeNotes: Bug fixes for issues reported on GitHub.
+  # Initial "Public" Version for Conversions API Tag
+  - sha: 47daf13d1de21fbf2de68d4a2926581ee39d79a3
+    changeNotes: Added support for GA4 Web Tag and Client to post event to Conversions API.
+  - sha: 329d13128703af9bad62090dc7ff6b19e57ed4cc
+    changeNotes: Adding support for converting common event model with Meta Pixel specific parameters to Conversions API.
