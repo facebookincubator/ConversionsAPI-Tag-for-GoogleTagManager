@@ -227,6 +227,8 @@ event.event_source_url = eventModel.page_location;
 if(eventModel.action_source || data.actionSource) {
   event.action_source = eventModel.action_source ? eventModel.action_source : data.actionSource;
 }
+event.referrer_url = eventModel.page_referrer;
+
 
 event.user_data = {};
 // Default Tag Parameters
@@ -767,6 +769,7 @@ scenarios:
         client_id: 'client123',
         ip_override: testData.ip_address,
         user_agent: testData.user_agent,
+        page_referrer: testData.page_referrer,
       };
     mock('getAllEventData', () => {
       return common_event_schema;
@@ -1187,6 +1190,7 @@ setup: |-
     event_time: "123456789",
     test_event_code: "test123",
     action_source: 'website',
+    page_referrer: 'https://www.facebook.com',
     user_data: {
       ip_address: '1.2.3.4',
       user_agent: 'Test_UA',
@@ -1229,6 +1233,7 @@ setup: |-
   let inputEventModel = {
     'event_name': testData.event_name,
     'event_time': testData.event_time,
+    'page_referrer': testData.page_referrer,
     'ip_override': testData.user_data.ip_address,
     'user_agent': testData.user_data.user_agent,
     'test_event_code': testData.test_event_code,
@@ -1264,10 +1269,11 @@ setup: |-
     'data_processing_options_state': testData.data_processing_options_state,
   };
 
-  const expectedEventData = {
+const expectedEventData = {
   'event_name': testData.event_name,
   'event_time': testData.event_time,
   'action_source': testConfigurationData.actionSource,
+  'referrer_url': testData.page_referrer,
   'user_data': {
     'client_ip_address': testData.user_data.ip_address,
     'client_user_agent': testData.user_data.user_agent,
@@ -1301,6 +1307,7 @@ setup: |-
       'status': testData.custom_data.status,
       'delivery_category': testData.custom_data.delivery_category,
     },
+    'referrer_url': 'https://www.facebook.com',
     'data_processing_options': testData.data_processing_options,
     'data_processing_options_country': testData.data_processing_options_country,
     'data_processing_options_state': testData.data_processing_options_state,
