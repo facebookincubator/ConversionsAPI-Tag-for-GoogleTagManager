@@ -14,6 +14,7 @@ ___INFO___
   "version": 1,
   "securityGroups": [],
   "displayName": "Conversions API Tag",
+  "categories": ["CONVERSIONS"],
   "brand": {
     "id": "brand_dummy",
     "displayName": "",
