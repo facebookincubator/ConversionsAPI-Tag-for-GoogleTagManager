@@ -2,7 +2,7 @@ homepage: "https://developers.facebook.com/docs/marketing-api/conversions-api"
 documentation: "https://developers.facebook.com/docs/marketing-api/conversions-api/guides/gtm-server-side"
 versions:
   # Latest version
-  - sha: 3c1c1348468f42007e64d64111395bf8b58dae95
+  - sha: aec3fd47201786f04b2ff91302581779d592e7e2
     changeNotes: Add categories in template
   # Older versions
   - sha: 70505a04060b0506cfc0e0850de7c2ef68e8fdf5
