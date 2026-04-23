@@ -2,9 +2,11 @@ homepage: "https://developers.facebook.com/docs/marketing-api/conversions-api"
 documentation: "https://developers.facebook.com/docs/marketing-api/conversions-api/guides/gtm-server-side"
 versions:
   # Latest version
+  - sha: a575edb31aa447469b855c3006ed9991dad711cf
+    changeNotes: Update partner agent version
+  # Older versions
   - sha: 70b5dcc59d38924b1baea1eb685a16c060ad2c7b
     changeNotes: Update Conversion API to v25
-  # Older versions
   - sha: 4b46cf32acb679e8af51aa94faaaf16ded923004
     changeNotes: Add categories in template
   - sha: 70505a04060b0506cfc0e0850de7c2ef68e8fdf5
