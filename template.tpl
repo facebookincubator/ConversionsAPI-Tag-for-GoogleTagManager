@@ -61,10 +61,24 @@ ___TEMPLATE_PARAMETERS___
     "help": "Code used to verify that your server events are received correctly by Conversions API. Use this code to test your server events in the Test Events feature in Events Manager. See \u003ca href\u003d\"https://developers.facebook.com/docs/marketing-api/conversions-api/using-the-api#testEvents\"\u003e Test Events Tool\u003c/a\u003e for an example."
   },
   {
+    "type": "TEXT",
+    "name": "uploadTag",
+    "displayName": "Upload Tag (Offline)",
+    "simpleValueType": true,
+    "help": "A string used to group offline events into a batch upload. This is useful for tracking and organizing offline conversion data sent through the Conversions API. Only applicable for offline action sources (physical_store).",
+    "enablingConditions": [
+      {
+        "paramName": "actionSource",
+        "paramValue": "physical_store",
+        "type": "EQUALS"
+      }
+    ]
+  },
+  {
     "type": "SELECT",
     "name": "actionSource",
     "displayName": "Action Source",
-    "macrosInSelect": false,
+    "macrosInSelect": true,
     "selectItems": [
       {
         "value": "website",
@@ -224,9 +238,12 @@ const event = {};
 event.event_name = getMetaEventName(eventModel.event_name);
 event.event_time = eventModel.event_time || (Math.round(getTimestampMillis() / 1000));
 event.event_id = eventModel.event_id;
-event.event_source_url = eventModel.page_location;
 if(eventModel.action_source || data.actionSource) {
   event.action_source = eventModel.action_source ? eventModel.action_source : data.actionSource;
+}
+const OFFLINE_ACTION_SOURCES = ['physical_store'];
+if(OFFLINE_ACTION_SOURCES.indexOf(event.action_source) === -1) {
+  event.event_source_url = eventModel.page_location;
 }
 event.referrer_url = eventModel.page_referrer;
 
@@ -448,6 +465,10 @@ function sendEventToCapiServers(pixel_event) {
 
   if(eventModel.test_event_code || data.testEventCode) {
     eventRequest.test_event_code = eventModel.test_event_code ? eventModel.test_event_code : data.testEventCode;
+  }
+
+  if(eventModel.upload_tag || data.uploadTag) {
+    eventRequest.upload_tag = eventModel.upload_tag ? eventModel.upload_tag : data.uploadTag;
   }
 
   const routeParams = 'events?access_token=' + data.apiAccessToken;
@@ -739,6 +760,27 @@ ___SERVER_PERMISSIONS___
                 ]
               }
             ]
+          }
+        }
+      ]
+    },
+    "clientAnnotations": {
+      "isEditedByUser": true
+    },
+    "isRequired": true
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "logging",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "environments",
+          "value": {
+            "type": 1,
+            "string": "all"
           }
         }
       ]
@@ -1167,6 +1209,62 @@ scenarios:
 
     assertThat(JSON.parse(httpBody).data[0].user_data.em).isEqualTo('ee278943de84e5d6243578ee1a1057bcce0e50daad9755f45dfa64b60b13bc5d');
     assertThat(JSON.parse(httpBody).data[0].user_data.ph).isEqualTo('c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646');
+- name: on physical_store action_source, event_source_url is not sent
+  code: |-
+    mock('getAllEventData', () => {
+      inputEventModel.action_source = 'physical_store';
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+    assertThat(JSON.parse(httpBody).data[0].event_source_url).isUndefined();
+    assertThat(JSON.parse(httpBody).data[0].action_source).isEqualTo('physical_store');
+- name: on website action_source, event_source_url is sent
+  code: |-
+    mock('getAllEventData', () => {
+      inputEventModel.action_source = 'website';
+      inputEventModel.page_location = 'https://example.com/checkout';
+      return inputEventModel;
+    });
+    runCode(testConfigurationData);
+    assertThat(JSON.parse(httpBody).data[0].event_source_url).isEqualTo('https://example.com/checkout');
+    assertThat(JSON.parse(httpBody).data[0].action_source).isEqualTo('website');
+- name: upload_tag is included in request when provided via tag config
+  code: |-
+    runCode({
+      pixelId: '123',
+      apiAccessToken: 'abc',
+      testEventCode: 'test123',
+      actionSource: 'physical_store',
+      uploadTag: 'offline_batch_2026_04',
+      extendCookies: false
+    });
+    assertThat(JSON.parse(httpBody).upload_tag).isEqualTo('offline_batch_2026_04');
+    assertApi('gtmOnSuccess').wasCalled();
+- name: upload_tag from event model overrides tag config
+  code: |-
+    mock('getAllEventData', () => {
+      inputEventModel.upload_tag = 'event_model_batch';
+      return inputEventModel;
+    });
+    runCode({
+      pixelId: '123',
+      apiAccessToken: 'abc',
+      actionSource: 'physical_store',
+      uploadTag: 'tag_config_batch',
+      extendCookies: false
+    });
+    assertThat(JSON.parse(httpBody).upload_tag).isEqualTo('event_model_batch');
+    assertApi('gtmOnSuccess').wasCalled();
+- name: upload_tag is not included in request when not provided
+  code: |-
+    runCode({
+      pixelId: '123',
+      apiAccessToken: 'abc',
+      actionSource: 'website',
+      extendCookies: false
+    });
+    assertThat(JSON.parse(httpBody).upload_tag).isUndefined();
+    assertApi('gtmOnSuccess').wasCalled();
 setup: |-
   // Arrange
   const JSON = require('JSON');

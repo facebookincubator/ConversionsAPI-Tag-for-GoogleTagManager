@@ -1,5 +1,11 @@
 ## Unreleased
 
+0.1.0 (TBD)
+* Enable `action_source` to accept GTM variables, allowing a single tag to serve
+  both online and offline conversion tracking use cases.
+* Suppress `event_source_url` when `action_source` is `physical_store`, aligning
+  with Meta CAPI parameter requirements for offline events.
+
 ## Released
 
 0.0.9 (Sept 5, 2023)
